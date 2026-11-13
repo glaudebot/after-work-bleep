@@ -95,25 +95,45 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
     await p.getByRole('button', { name: /도감/ }).click();
     wide.push(['도감', await noHScroll(p)]);
     await p.getByRole('button', { name: /미에르콜레스/ }).first().click();
-    const active = await p.locator('button.bg-blue-500', { hasText: '미에르콜레스' }).count();
-    check('T-08', active === 1 && (await p.locator('span.bg-black').textContent()) === '미에르콜레스');
+    const mark = () => p.locator('[data-card] [data-mark]').textContent();
+    check('T-08', (await mark()) === '미에르콜레스');
 
     await p.fill('input', '김부장님의아들딸최고');
-    const fits = await p.evaluate(() => {
-      const card = document.querySelector('span.bg-black').closest('div');
-      const r = card.getBoundingClientRect();
-      return [...card.querySelectorAll('span')].every((el) => el.getBoundingClientRect().right <= r.right + 0.5);
-    });
-    check('T-09', fits);
-    wide.push(['짤 만들기', await noHScroll(p)]);
-
     const dl = p.waitForEvent('download');
     await p.getByRole('button', { name: /이미지 저장/ }).click();
     await (await dl).saveAs(`${OUT}/meme.png`);
-    await p.locator('span.bg-black').locator('xpath=ancestor::div[1]').screenshot({ path: `${OUT}/meme-screen.png` });
+    await p.locator('[data-card]').screenshot({ path: `${OUT}/meme-screen.png` });
     const png = fs.readFileSync(`${OUT}/meme.png`);
     const w = png.readUInt32BE(16), h = png.readUInt32BE(20);
     check('T-10', w > 0 && w === h, `${w}x${h}, 눈으로 비교: ${OUT}/meme.png ↔ ${OUT}/meme-screen.png`);
+    wide.push(['짤 만들기', await noHScroll(p)]);
+
+    // T-09: 템플릿마다 10자 이름이 카드 밖으로 안 넘침. 템플릿 시트로 하나씩 고른다
+    const templates = require('../src/data/templates.json');
+    const overflow = [];
+    for (const [i, t] of templates.entries()) {
+      await p.getByRole('button', { name: /템플릿/ }).click();
+      if (i === 0) { wide.push(['템플릿 시트', await noHScroll(p)]); await p.screenshot({ path: `${OUT}/sheet-template.png` }); }
+      await p.getByRole('dialog').getByRole('button', { name: t.name }).click();
+      const ok = await p.evaluate(() => {
+        const card = document.querySelector('[data-card]');
+        const r = card.getBoundingClientRect();
+        return [...card.querySelectorAll('*')].every((el) => {
+          const e = el.getBoundingClientRect();
+          return e.right <= r.right + 0.5 && e.bottom <= r.bottom + 0.5 && e.left >= r.left - 0.5;
+        });
+      });
+      if (!ok) overflow.push(t.id);
+      await p.locator('[data-card]').screenshot({ path: `${OUT}/card-${t.id}.png` });
+    }
+    check('T-09', overflow.length === 0, overflow.join(', '));
+
+    await p.getByRole('button', { name: /단어/ }).click();
+    wide.push(['단어 시트', await noHScroll(p)]);
+    await p.screenshot({ path: `${OUT}/sheet-word.png` });
+    await p.getByRole('dialog').getByRole('button', { name: /고쉬/ }).click();
+    const bg = await p.locator('[data-card]').evaluate((el) => getComputedStyle(el).backgroundColor);
+    check('T-18', (await mark()) === '고쉬' && bg === 'rgb(31, 41, 55)', `단어 ${await mark()}, 마지막 템플릿 배경 ${bg}`);
     await p.getByRole('button', { name: '← 뒤로' }).last().click(); // 짤(위에 겹침) → 도감
     const backToCol = await p.getByText('비속어 도감').isVisible();
     await p.getByRole('button', { name: '← 뒤로' }).click(); // 도감 → 메인
