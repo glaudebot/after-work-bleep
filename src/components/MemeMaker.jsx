@@ -1,6 +1,6 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import oaths from '../data/oaths.json';
-import { captureAndShare } from '../lib/captureAndSave';
+import { captureAndShare, preloadCapture } from '../lib/captureAndSave';
 
 export default function MemeMaker({ collected, initialOathId, onClose }) {
   const owned = oaths.filter((o) => collected.includes(o.id));
@@ -8,6 +8,7 @@ export default function MemeMaker({ collected, initialOathId, onClose }) {
   const [oathId, setOathId] = useState(initialOathId ?? owned[0]?.id);
   const [busy, setBusy] = useState(false);
   const cardRef = useRef(null);
+  useEffect(() => { preloadCapture().catch(() => {}); }, []); // 실패는 저장 때 다시 시도
 
   const oath = owned.find((o) => o.id === oathId) ?? owned[0];
   const xx = name.trim() || 'XX';

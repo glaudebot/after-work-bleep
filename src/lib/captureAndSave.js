@@ -1,10 +1,14 @@
-import html2canvas from 'html2canvas';
+// 첫 번들에서 빼고 짤 화면이 열릴 때 미리 받는다 (M1-2). 실패하면 다음 호출에서 다시 받는다.
+let lib;
+export const preloadCapture = () =>
+  (lib ??= import('html2canvas').then((m) => m.default, (e) => { lib = null; throw e; }));
 
 /** DOM 노드 → PNG Blob */
 export async function captureNode(node) {
   // 웹폰트가 로드되기 전에 캡처하면 글꼴이 깨지므로 대기
   if (document.fonts?.ready) await document.fonts.ready;
 
+  const html2canvas = await preloadCapture();
   const canvas = await html2canvas(node, {
     scale: Math.min(window.devicePixelRatio || 2, 3), // 선명도 vs 메모리 균형
     backgroundColor: null,  // 노드의 배경색 그대로
