@@ -129,7 +129,7 @@ export default function App() {
         <button className={`flex-[2] rounded-full py-2 shadow-sm ${night ? 'bg-black/40' : 'bg-white'}`} aria-label="도감" onClick={() => setShowCollection(true)}>
           <img src={book} alt="" className="mx-auto h-10" draggable={false} />
         </button>
-        <button className="flex-[3] rounded-full bg-blue-500 py-2 shadow-sm disabled:bg-gray-300 disabled:opacity-60"
+        <button className="flex-[3] rounded-full bg-[#3182f6] py-2 shadow-sm disabled:bg-gray-300 disabled:opacity-60"
           aria-label="짤 만들기" disabled={!collected.length} onClick={() => setMeme({ oathId: null })}>
           <img src={camera} alt="" className="mx-auto h-10" draggable={false} />
         </button>
