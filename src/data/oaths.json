@@ -20,6 +20,7 @@
   { "id": "en-geewhiz", "word": "지 위즈", "original": "Gee whiz", "country": "🇺🇸 미국", "meaning": "우와 (Jesus 순화)", "rarity": "uncommon" },
   { "id": "en-drat", "word": "드랫", "original": "Drat", "country": "🇬🇧 영국", "meaning": "쳇 (God rot 줄임)", "rarity": "common" },
   { "id": "en-nincompoop", "word": "닌컴푸프", "original": "Nincompoop", "country": "🇬🇧 영국", "meaning": "얼간이, 멍청이 (17세기부터 쓴 장난스러운 말)", "rarity": "common" },
+  { "id": "en-barnacles", "word": "바나클스", "original": "Barnacles", "country": "🇺🇸 미국", "meaning": "이런 젠장 (따개비, 뱃사람 말투)", "rarity": "common" },
   { "id": "en-rats", "word": "래츠", "original": "Rats", "country": "🇺🇸 미국", "meaning": "쥐들! → 아 쳇", "rarity": "common" },
   { "id": "en-nuts", "word": "너츠", "original": "Nuts", "country": "🇺🇸 미국", "meaning": "견과류! → 에잇", "rarity": "common" },
   { "id": "en-sugar", "word": "슈거", "original": "Sugar", "country": "🇬🇧 영국", "meaning": "설탕! (shit 순화)", "rarity": "common" },
