@@ -212,7 +212,7 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
       p = await open(browser, { time: at(12), collected: ['es-caramba'], toss: true });
       p.on('pageerror', (e) => errs.push(e.message));
       const homeOk = (await label(p)) === '퇴근까지';
-      await p.getByRole('button', { name: '📖 도감' }).click();
+      await p.getByRole('button', { name: '도감', exact: true }).click();
       const inCollection = await p.getByRole('button', { name: '← 뒤로' }).count();
       check('T-24', inCollection === 0 && homeOk && errs.length === 0, `← 뒤로 ${inCollection}개, 에러 ${errs.join('; ') || '없음'}`);
       await p.context().close();

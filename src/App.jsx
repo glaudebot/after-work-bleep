@@ -9,6 +9,7 @@ import Collection from './components/Collection';
 import MemeMaker from './components/MemeMaker';
 import Character from './components/Character';
 import Burst from './components/Burst';
+import book from './assets/book.webp';
 
 // 시간대 배경 (D-18): 어항 그림. 그라데이션은 그림이 뜨기 전 바탕
 const BG = import.meta.glob('./assets/bg/*.webp', { eager: true, import: 'default' });
@@ -110,8 +111,8 @@ export default function App() {
       </section>
 
       <nav className="fixed inset-x-0 bottom-0 flex gap-2 px-5 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
-        <button className={`flex-[2] rounded-full py-4 font-semibold shadow-sm ${night ? 'bg-black/40 text-white' : 'bg-white'}`} onClick={() => setShowCollection(true)}>
-          📖 도감
+        <button className={`flex-[2] rounded-full py-2 shadow-sm ${night ? 'bg-black/40' : 'bg-white'}`} aria-label="도감" onClick={() => setShowCollection(true)}>
+          <img src={book} alt="" className="mx-auto h-10" draggable={false} />
         </button>
         <button className="flex-[3] rounded-full bg-blue-500 py-4 font-semibold text-white disabled:bg-gray-300"
           disabled={!collected.length} onClick={() => setMeme({ oathId: null })}>
