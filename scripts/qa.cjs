@@ -96,6 +96,22 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
     p = await open(browser, { time: at(12), collected: ['en-gosh', 'es-miercoles'] });
     await p.getByRole('button', { name: /도감/ }).click();
     wide.push(['도감', await noHScroll(p)]);
+    // T-23: 국가별·등급별 묶음 소제목과 모은 수 (M3)
+    {
+      const oaths = require('../src/data/oaths.json');
+      const heads = () => p.locator('[data-group]').allTextContents();
+      await p.getByRole('button', { name: '국가별' }).click();
+      const byCountry = await heads(), es = oaths.filter((o) => o.country === '🇪🇸 스페인').length;
+      const okCountry = byCountry.length === new Set(oaths.map((o) => o.country)).size && byCountry.includes(`🇪🇸 스페인 1/${es}`);
+      wide.push(['도감 국가별', await noHScroll(p)]);
+      await p.getByRole('button', { name: '등급별' }).click();
+      const byRarity = await heads();
+      const okRarity = byRarity.length === 5 && byRarity[0] === `전설 0/${oaths.filter((o) => o.rarity === 'legendary').length}`;
+      await p.screenshot({ path: `${OUT}/collection-rarity.png` });
+      await p.getByRole('button', { name: '전체' }).click();
+      const okAll = (await p.locator('[data-group]').count()) === 0;
+      check('T-23', okCountry && okRarity && okAll, `국가 ${byCountry.length}묶음, 등급 첫 줄 ${byRarity[0]}`);
+    }
     await p.getByRole('button', { name: /미에르콜레스/ }).first().click();
     const mark = () => p.locator('[data-card] [data-mark]').textContent();
     check('T-08', (await mark()) === '미에르콜레스');

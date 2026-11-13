@@ -5,7 +5,7 @@ import { captureAndShare, preloadCapture } from '../lib/captureAndSave';
 import MemeCard, { BLEEP } from './MemeCard';
 import PickerSheet from './PickerSheet';
 
-const RARITY = { common: ['일반', '#6b7280'], uncommon: ['고급', '#16a34a'], epic: ['에픽', '#9333ea'], unique: ['유니크', '#dc2626'], legendary: ['전설', '#d97706'] };
+export const RARITY = { common: ['일반', '#6b7280'], uncommon: ['고급', '#16a34a'], epic: ['에픽', '#9333ea'], unique: ['유니크', '#dc2626'], legendary: ['전설', '#d97706'] };
 
 export default function MemeMaker({ collected, initialOathId, onClose }) {
   const owned = oaths.filter((o) => collected.includes(o.id));
