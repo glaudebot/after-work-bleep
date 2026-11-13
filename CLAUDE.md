@@ -1,23 +1,41 @@
 # 퇴근 후 삐-처리 (After-Work Bleep)
 
-직장인용 앱인토스(토스 인앱) 미니앱. 출근·퇴근까지 남은 시간을 카운트다운으로 보여주고, 퇴근하면 세계 각국의 귀여운 순화 비속어(minced oaths)를 하나 뽑아 도감에 모은다. 모은 단어로 "아 우리 [XX]님 [YY] 같네" 짤을 만들어 이미지로 저장하거나 공유할 수 있다.
+출근·퇴근 카운트다운을 보여주고, 퇴근하면 귀여운 순화 비속어를 뽑아 도감에 모으고 짤로 만드는 앱인토스(토스 인앱) 미니앱.
 
-## 스택과 제약
-- React + Tailwind CSS. 백엔드 없음.
-- 비속어 DB는 `src/data/oaths.json`(정적 JSON). 유저 데이터는 LocalStorage에 저장하고, 키는 `bleep:` 접두사를 쓴다.
-- 실행 환경은 토스 앱 안의 웹뷰. 모바일 세로 화면이 기준이다.
-- 이미지 캡처는 `html2canvas`로 한다.
+## 문서
+| 문서 | 내용 |
+|---|---|
+| [docs/spec.md](docs/spec.md) | 기준 정의서 |
+| [docs/MILESTONE_RULES.md](docs/MILESTONE_RULES.md) | 작업 방식 전체 (진행 순서, 문서 구조, 템플릿) |
+| [MILESTONES.md](MILESTONES.md) | 마일스톤 색인 (3단계에서 만듦) |
+| [docs/decisions.md](docs/decisions.md) | 설계 결정 (D-번호) |
+| [docs/qa/QA_CHECKLIST.md](docs/qa/QA_CHECKLIST.md) | 마감 때 돌리는 점검 항목 |
+| [STACK.md](STACK.md) | 스택·버전과 변경 이력 |
+| [TODO.md](TODO.md) | 꼭지점에 안 들어간 요청·보류 |
 
-## 현재 상태
-- `src/`에 MVP 컴포넌트와 로직만 있다. **아직 `package.json`, Vite·Tailwind 설정, `index.html`, `main.jsx`가 없다.** 지금은 빌드되지 않는다.
-- 구조는 README.md 참고.
+## 구조·스택
+- React 19 + Tailwind CSS v3.4 + Vite, 캡처는 html2canvas. 백엔드 없음 (D-01, D-02).
+- 단어 DB는 `src/data/oaths.json`, 유저 데이터는 localStorage `bleep:` 접두사.
+- 토스 웹뷰, 모바일 세로 375px 기준.
+- 파일 구조는 [README.md](README.md), 핵심 설계는 [decisions.md](docs/decisions.md) D-08, D-09, D-14, D-15.
 
-## 핵심 설계 (바꿀 때 주의)
-- `useCountdown`: `setInterval` 대신 다음 정각 초에 맞춰 `setTimeout`을 이어 건다. 매 틱마다 `Date.now()`로 다시 계산하고, 화면이 가려지면(`visibilitychange`) 멈춘다. 매초 다시 그리는 범위는 `memo`로 감싼 `<Countdown>` 안으로만 한정한다.
-- `getWorkPhase`: 출근 전(before) / 근무 중(working) / 퇴근 후(off) 상태를 계산한다. 야간 근무(퇴근 시각 < 출근 시각)도 지원한다.
-- 퇴근 보상은 근무일마다 1번(`bleep:lastReward`). 아직 안 모은 단어를 먼저 주고, 등급별 가중치로 뽑는다.
-- 짤 캡처 영역에는 외부 이미지를 넣지 않는다(CORS 때문에 캡처가 깨짐). 저장 순서는 Web Share(파일) → 실패하면 `<a download>`.
+## 실행
+```
+npm install
+npm run dev      # 개발 서버
+npm test         # node:test
+npm run build    # 빌드 (타입 검사 없음: JS 프로젝트)
+```
 
-## 알려진 리스크
-- 토스 웹뷰에서는 `navigator.share`로 파일을 넘기는 것과 `<a download>`가 막혀 있을 수 있다. 실제 기기에서 확인해야 한다. 막혀 있으면 앱인토스 SDK에서 이미지를 기기에 저장하는 API를 찾아 `src/lib/captureAndSave.js` 저장 순서 맨 앞에 넣는다.
-- localStorage는 `try/catch`로 감싸서 접근한다(이미 `useLocalStorage`에 적용됨).
+## 작업 규칙
+- 개발은 꼭지점 단위. 꼭지점 문서 하나만 읽고 작업한다.
+- 착수 전에 "정할 것"을 선택지 + 추천안(이유)으로 묻는다. 답을 받으면 "정해진 것"으로 옮기고(날짜), 필요하면 D-번호를 추가한다.
+- 새 화면·기능은 화면 구성을 글로 정리해 확인받는다. 목업은 요청할 때만.
+- 꼭지점이 크면 "단계" 표로 나눠 한 단계씩 진행하고 확인받는다.
+- 항목을 끝낼 때마다 체크리스트를 갱신한다.
+- 꼭지점 끝: 테스트 + 빌드 → 꼭지점 ✅ → 마일스톤 색인 갱신 → 커밋 → `/compact` 권장.
+- 다음 마일스톤을 시작할 때는 꼭지점 문서들을 먼저 만들고 목록을 승인받는다.
+- 마일스톤에 안 들어간 요청·보류·QA 지적은 TODO.md에, 반영하면 지운다.
+- 스택이 바뀌면 그 자리에서 STACK.md와 꼭지점 Stack 항목에 적는다.
+- 작은 판단은 가장 단순한 방식으로 정하고 꼭지점 문서에 기록. 큰 설계 판단은 멈추고 묻는다.
+- D-08, D-09, D-14, D-15(핵심 설계)를 바꿀 때는 먼저 묻는다.

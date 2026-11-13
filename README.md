@@ -18,4 +18,4 @@ src/
    └─ MemeMaker.jsx         # 짤 편집 + 캡처 영역
 ```
 
-설치: `npm i html2canvas`
+실행 방법과 문서는 [CLAUDE.md](CLAUDE.md) 참고.
