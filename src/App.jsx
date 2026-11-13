@@ -1,14 +1,22 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import oaths from './data/oaths.json';
 import { useLocalStorage } from './hooks/useLocalStorage';
-import { getWorkPhase, todayKey } from './lib/time';
+import { getDayPart, getMood, getWorkPhase, todayKey } from './lib/time';
 import Countdown from './components/Countdown';
 import SettingsSheet from './components/SettingsSheet';
 import RewardModal from './components/RewardModal';
 import Collection from './components/Collection';
 import MemeMaker from './components/MemeMaker';
+import Character from './components/Character';
 
 // 등급 가중치 랜덤 뽑기 (미수집 단어 우선)
+// 시간대 배경 (D-18). 배경 그림이 오기 전까지 그라데이션
+const SKY = {
+  morning: 'linear-gradient(180deg, #ffd9b3 0%, #fff1e0 100%)',
+  noon: 'linear-gradient(180deg, #9fd3f7 0%, #e6f4ff 100%)',
+  night: 'linear-gradient(180deg, #1e2a5a 0%, #3b4a7a 100%)',
+};
+
 const WEIGHT = { common: 60, rare: 25, epic: 12, legendary: 3 };
 function drawOath(collected) {
   const pool = oaths.filter((o) => !collected.includes(o.id));
@@ -51,13 +59,25 @@ export default function App() {
     if (work.phase === 'off') giveReward();
   }, [work.phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // 표정·배경은 30초마다, 화면으로 돌아올 때 다시 계산 (매초는 Countdown만, D-08)
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const tick = () => setNow(new Date());
+    const id = setInterval(tick, 30_000);
+    document.addEventListener('visibilitychange', tick);
+    return () => { clearInterval(id); document.removeEventListener('visibilitychange', tick); };
+  }, []);
+  const mood = getMood(work, now);
+  const dayPart = getDayPart(now);
+  const night = dayPart === 'night';
+
   const handleCountdownDone = useCallback(() => setPhaseTick((t) => t + 1), []);
 
   return (
-    <main className="min-h-dvh bg-gray-50 px-5 pb-28 pt-6">
-      <header className="flex items-center justify-between">
+    <main data-daypart={dayPart} style={{ background: SKY[dayPart] }} className="flex min-h-dvh flex-col px-5 pb-28 pt-6">
+      <header className={`flex items-center justify-between ${night ? 'text-white' : ''}`}>
         <h1 className="text-xl font-black">퇴근 후 삐-처리</h1>
-        <button className="text-sm text-gray-500" onClick={() => setShowSettings(true)}>
+        <button className={`text-sm ${night ? 'text-white/70' : 'text-gray-500'}`} onClick={() => setShowSettings(true)}>
           {settings.start}~{settings.end} ⚙️
         </button>
       </header>
@@ -71,9 +91,11 @@ export default function App() {
         />
       </section>
 
-      {/* M1.5-2: 캐릭터 자리 */}
+      <section className="flex flex-1 items-center justify-center py-6">
+        <Character mood={mood} />
+      </section>
 
-      <nav className="fixed inset-x-0 bottom-0 flex gap-2 bg-gray-50 px-5 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+      <nav className="fixed inset-x-0 bottom-0 flex gap-2 px-5 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
         <button className="flex-1 rounded-xl bg-white py-4 font-semibold shadow-sm" onClick={() => setShowCollection(true)}>
           📖 도감
         </button>

@@ -148,6 +148,18 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
     await p.screenshot({ path: `${OUT}/main.png` });
     await p.context().close();
 
+    // T-20: 근무 진행률별 표정, 시각별 배경 (09:00~18:00, 보상은 이미 받은 상태로)
+    const moods = [];
+    for (const [h, m, mood, part] of [[7, 0, 'sleepy', 'morning'], [10, 0, 'calm', 'morning'], [14, 0, 'annoyed', 'noon'], [16, 30, 'angry', 'noon'], [17, 40, 'furious', 'noon'], [19, 0, 'relieved', 'night']]) {
+      p = await open(browser, { time: at(h, m), lastReward: '2026-11-13' });
+      const got = [await p.locator('[data-mood]').getAttribute('data-mood'), await p.locator('main').getAttribute('data-daypart')];
+      if (got[0] !== mood || got[1] !== part) moods.push(`${h}:${m} ${got.join('/')}`);
+      if (mood === 'furious' || mood === 'relieved') wide.push([`홈 ${mood}`, await noHScroll(p)]);
+      await p.screenshot({ path: `${OUT}/home-${mood}.png` });
+      await p.context().close();
+    }
+    check('T-20', moods.length === 0, moods.join(', '));
+
     check('T-11', wide.every(([, ok]) => ok), wide.filter(([, ok]) => !ok).map(([n]) => n).join(', '));
   } finally {
     await browser.close();

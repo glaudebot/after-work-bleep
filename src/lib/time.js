@@ -28,7 +28,7 @@ export function getWorkPhase({ start, end }, now = new Date()) {
   }
 
   if (now < s) return { phase: 'before', target: s, workEnd: e };
-  if (now < e) return { phase: 'working', target: e, workEnd: e };
+  if (now < e) return { phase: 'working', target: e, workEnd: e, workStart: s };
 
   const nextStart = new Date(s);
   nextStart.setDate(nextStart.getDate() + 1);
@@ -45,3 +45,17 @@ export function splitMs(ms) {
 }
 
 export const pad2 = (n) => String(n).padStart(2, '0');
+
+// 복어 표정 단계 (D-18). 근무 중에는 근무 시간 중 지난 비율로 나눈다
+export function getMood(work, now = new Date()) {
+  if (work.phase === 'before') return 'sleepy';
+  if (work.phase === 'off') return 'relieved';
+  const p = (now - work.workStart) / (work.workEnd - work.workStart);
+  return p < 0.5 ? 'calm' : p < 0.8 ? 'annoyed' : p < 0.95 ? 'angry' : 'furious';
+}
+
+// 배경 시간대 (D-18): 아침 06~11시, 점심 11~18시, 밤 18~06시
+export function getDayPart(now = new Date()) {
+  const h = now.getHours();
+  return h >= 6 && h < 11 ? 'morning' : h >= 11 && h < 18 ? 'noon' : 'night';
+}
