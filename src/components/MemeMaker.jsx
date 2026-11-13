@@ -43,7 +43,7 @@ export default function MemeMaker({ collected, initialOathId, onClose }) {
       <div ref={cardRef} className="mx-auto mt-4 aspect-square w-full max-w-sm rounded-3xl bg-yellow-300 p-6 flex flex-col justify-center">
         <p className="text-xs font-semibold text-yellow-800">{oath.country} · {oath.original}</p>
         <p className="mt-3 break-keep text-3xl font-black leading-snug text-gray-900">
-          아 우리 <span className="text-blue-600">{xx}</span>님<br />
+          아 우리 <span className="break-all text-blue-600">{xx}</span>님<br />
           <span className="bg-black px-2 text-white">{oath.word}</span> 같네
         </p>
         <p className="mt-4 text-xs text-yellow-800">뜻: {oath.meaning}</p>
