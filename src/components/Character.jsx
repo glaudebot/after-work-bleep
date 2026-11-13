@@ -12,7 +12,7 @@ function Character({ mood }) {
   return (
     <div className={furious ? 'scale-110' : undefined}>
       <img src={srcOf(mood)} alt="" data-mood={mood} draggable={false}
-        className={`w-64 select-none ${furious ? 'motion-safe:animate-shake drop-shadow-[0_0_24px_rgba(239,68,68,0.7)]' : ''}`} />
+        className={`w-full select-none ${furious ? 'motion-safe:animate-shake drop-shadow-[0_0_24px_rgba(239,68,68,0.7)]' : ''}`} />
     </div>
   );
 }
