@@ -92,6 +92,8 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
     await p.context().close();
 
     p = await open(browser, { time: at(12), collected: ['en-gosh', 'es-miercoles'] });
+    await p.getByRole('button', { name: /도감/ }).click();
+    wide.push(['도감', await noHScroll(p)]);
     await p.getByRole('button', { name: /미에르콜레스/ }).first().click();
     const active = await p.locator('button.bg-blue-500', { hasText: '미에르콜레스' }).count();
     check('T-08', active === 1 && (await p.locator('span.bg-black').textContent()) === '미에르콜레스');
@@ -112,6 +114,11 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
     const png = fs.readFileSync(`${OUT}/meme.png`);
     const w = png.readUInt32BE(16), h = png.readUInt32BE(20);
     check('T-10', w > 0 && w === h, `${w}x${h}, 눈으로 비교: ${OUT}/meme.png ↔ ${OUT}/meme-screen.png`);
+    await p.getByRole('button', { name: '← 뒤로' }).last().click(); // 짤(위에 겹침) → 도감
+    const backToCol = await p.getByText('비속어 도감').isVisible();
+    await p.getByRole('button', { name: '← 뒤로' }).click(); // 도감 → 메인
+    check('T-17', backToCol && (await p.getByText('비속어 도감').count()) === 0 && (await p.getByText('퇴근까지').isVisible()));
+    await p.screenshot({ path: `${OUT}/main.png` });
     await p.context().close();
 
     check('T-11', wide.every(([, ok]) => ok), wide.filter(([, ok]) => !ok).map(([n]) => n).join(', '));

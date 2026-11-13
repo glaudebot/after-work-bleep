@@ -29,6 +29,7 @@ export default function App() {
 
   const [reward, setReward] = useState(null); // { oath, isNew }
   const [showSettings, setShowSettings] = useState(false);
+  const [showCollection, setShowCollection] = useState(false);
   const [meme, setMeme] = useState(null);     // { oathId } | null
 
   // 퇴근 보상 (근무일 기준 하루 1회)
@@ -53,7 +54,7 @@ export default function App() {
   const handleCountdownDone = useCallback(() => setPhaseTick((t) => t + 1), []);
 
   return (
-    <main className="min-h-dvh bg-gray-50 px-5 pb-10 pt-6">
+    <main className="min-h-dvh bg-gray-50 px-5 pb-28 pt-6">
       <header className="flex items-center justify-between">
         <h1 className="text-xl font-black">퇴근 후 삐-처리</h1>
         <button className="text-sm text-gray-500" onClick={() => setShowSettings(true)}>
@@ -70,14 +71,21 @@ export default function App() {
         />
       </section>
 
-      <button className="mt-4 w-full rounded-xl bg-blue-500 py-4 font-semibold text-white disabled:bg-gray-300"
-        disabled={!collected.length} onClick={() => setMeme({ oathId: null })}>
-        짤 만들기
-      </button>
+      {/* M1.5-2: 캐릭터 자리 */}
 
-      <div className="mt-8">
-        <Collection collected={collected} onPick={(o) => setMeme({ oathId: o.id })} />
-      </div>
+      <nav className="fixed inset-x-0 bottom-0 flex gap-2 bg-gray-50 px-5 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+        <button className="flex-1 rounded-xl bg-white py-4 font-semibold shadow-sm" onClick={() => setShowCollection(true)}>
+          📖 도감
+        </button>
+        <button className="flex-1 rounded-xl bg-blue-500 py-4 font-semibold text-white disabled:bg-gray-300"
+          disabled={!collected.length} onClick={() => setMeme({ oathId: null })}>
+          짤 만들기
+        </button>
+      </nav>
+
+      {showCollection && (
+        <Collection collected={collected} onPick={(o) => setMeme({ oathId: o.id })} onClose={() => setShowCollection(false)} />
+      )}
 
       {showSettings && (
         <SettingsSheet settings={settings} onSave={setSettings} onClose={() => setShowSettings(false)} />

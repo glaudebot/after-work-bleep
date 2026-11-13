@@ -1,10 +1,11 @@
 import oaths from '../data/oaths.json';
 
-export default function Collection({ collected, onPick }) {
+export default function Collection({ collected, onPick, onClose }) {
   const owned = new Set(collected);
   return (
-    <section>
-      <h2 className="mb-3 font-bold">
+    <section className="fixed inset-0 z-30 overflow-y-auto bg-gray-50 p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+      <button className="text-gray-500" onClick={onClose}>← 뒤로</button>
+      <h2 className="mb-3 mt-4 font-bold">
         비속어 도감 <span className="text-gray-400">{owned.size}/{oaths.length}</span>
       </h2>
       <div className="grid grid-cols-3 gap-2">
