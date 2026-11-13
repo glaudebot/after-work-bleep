@@ -7,3 +7,13 @@ body {
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
 }
+
+/*
+ * html2canvas는 <img>를 넣어 글꼴 baseline을 잰다. Tailwind preflight의
+ * img { display: block } 때문에 이 측정이 틀어져 캡처한 글자가 아래로 밀린다.
+ */
+@layer base {
+  img {
+    display: inline-block;
+  }
+}
