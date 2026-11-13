@@ -8,6 +8,7 @@ import RewardModal from './components/RewardModal';
 import Collection from './components/Collection';
 import MemeMaker from './components/MemeMaker';
 import Character from './components/Character';
+import Burst from './components/Burst';
 
 // 등급 가중치 랜덤 뽑기 (미수집 단어 우선)
 // 시간대 배경 (D-18). 배경 그림이 오기 전까지 그라데이션
@@ -36,6 +37,8 @@ export default function App() {
   const work = useMemo(() => getWorkPhase(settings), [settings, phaseTick]);
 
   const [reward, setReward] = useState(null); // { oath, isNew }
+  const [burst, setBurst] = useState(false);  // 보상 창 앞의 펑 연출 (M1.5-3)
+  const endBurst = useCallback(() => setBurst(false), []);
   const [showSettings, setShowSettings] = useState(false);
   const [showCollection, setShowCollection] = useState(false);
   const [meme, setMeme] = useState(null);     // { oathId } | null
@@ -52,6 +55,8 @@ export default function App() {
     if (isNew) setCollected((c) => (c.includes(oath.id) ? c : [...c, oath.id]));
     setLastReward(key);
     setReward({ oath, isNew });
+    // 동작 줄이기를 켠 기기는 연출 없이 바로 보상 창
+    setBurst(!matchMedia('(prefers-reduced-motion: reduce)').matches);
   }, [work.workEnd, lastReward, collected, setCollected, setLastReward]);
 
   // 앱을 퇴근 후에 처음 열었을 때도 보상 지급
@@ -112,7 +117,8 @@ export default function App() {
       {showSettings && (
         <SettingsSheet settings={settings} onSave={setSettings} onClose={() => setShowSettings(false)} />
       )}
-      {reward && (
+      {reward && burst && <Burst word={reward.oath.word} onDone={endBurst} />}
+      {reward && !burst && (
         <RewardModal {...reward}
           onClose={() => setReward(null)}
           onMakeMeme={() => { setMeme({ oathId: reward.oath.id }); setReward(null); }} />

@@ -32,7 +32,9 @@ const label = (p) => p.locator('section p').nth(0).textContent();
 const clock = (p) => p.locator('section p').nth(1).textContent();
 // 시계는 설치 뒤에도 실제로 흐르므로 기대값에서 2초까지 허용
 const near = (hms, want) => { const sec = (t) => t.split(':').reduce((a, n) => a * 60 + +n, 0); const d = sec(want) - sec(hms); return d >= 0 && d <= 2; };
-const rewardShown = (p) => p.getByText('오늘도 퇴근 성공').count();
+const burstShown = (p) => p.locator('[data-burst]').count();
+// 펑 연출이 떠 있으면 탭해서 건너뛴 뒤 보상 창 확인 (연출 자체는 T-21)
+const rewardShown = async (p) => { if (await burstShown(p)) { await p.locator('[data-burst]').click(); await p.waitForTimeout(100); } return p.getByText('오늘도 퇴근 성공').count(); };
 const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <= innerWidth);
 
 (async () => {
@@ -62,7 +64,7 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
     wide.push(['보상 모달', await noHScroll(p)]);
     await p.screenshot({ path: `${OUT}/reward.png` });
     await p.reload(); await p.waitForTimeout(300);
-    check('T-03', (await rewardShown(p)) === 0);
+    check('T-03', (await burstShown(p)) === 0 && (await rewardShown(p)) === 0);
     await p.context().close();
 
     p = await open(browser, { time: at(7), settings: { start: '22:00', end: '06:00' } });
@@ -147,6 +149,29 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
     check('T-17', backToCol && (await p.getByText('비속어 도감').count()) === 0 && (await p.getByText('퇴근까지').isVisible()));
     await p.screenshot({ path: `${OUT}/main.png` });
     await p.context().close();
+
+    // T-21: 퇴근 순간 펑 연출 → 말풍선 단어 → 저절로 보상 창. 동작 줄이기면 연출 없이 바로
+    p = await open(browser, { time: at(17, 59, 59) });
+    await p.clock.runFor(1500); await p.waitForTimeout(100);
+    const swell = (await burstShown(p)) === 1 && (await p.getByText('오늘도 퇴근 성공').count()) === 0;
+    await p.clock.runFor(800); await p.waitForTimeout(100);
+    await p.waitForTimeout(500);
+    const bubble = await p.locator('[data-burst] p').first().textContent();
+    await p.screenshot({ path: `${OUT}/burst.png` });
+    await p.clock.runFor(1500); await p.waitForTimeout(100);
+    const word = await p.locator('.text-3xl').textContent();
+    const auto = (await burstShown(p)) === 0 && (await p.getByText('오늘도 퇴근 성공').count()) === 1;
+    await p.context().close();
+    p = await open(browser, { time: at(19) });
+    await p.emulateMedia({ reducedMotion: 'reduce' }); await p.reload(); await p.waitForTimeout(300);
+    const reduced = (await burstShown(p)) === 0; // 보상은 첫 로드에서 이미 받음: 연출이 다시 안 뜨는지만 본다
+    await p.context().close();
+    const ctx = await browser.newContext({ viewport: { width: 375, height: 667 }, reducedMotion: 'reduce' });
+    await ctx.clock.install({ time: at(19) });
+    p = await ctx.newPage(); await p.goto(URL); await p.waitForTimeout(300);
+    const reducedNow = (await burstShown(p)) === 0 && (await p.getByText('오늘도 퇴근 성공').count()) === 1;
+    await ctx.close();
+    check('T-21', swell && bubble === `${word}!` && auto && reduced && reducedNow, `부풀기 ${swell}, 말풍선 ${bubble}, 자동 ${auto}, 동작줄이기 ${reducedNow}`);
 
     // T-20: 근무 진행률별 표정, 시각별 배경 (09:00~18:00, 보상은 이미 받은 상태로)
     const moods = [];
