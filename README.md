@@ -9,7 +9,8 @@ src/
 │  └─ useLocalStorage.js    # 안전한 LocalStorage 동기화
 ├─ lib/
 │  ├─ time.js               # 근무 상태(before/working/off) 계산, 야간근무 지원
-│  └─ captureAndSave.js     # html2canvas → Web Share → download 폴백
+│  ├─ captureAndSave.js     # html2canvas → Web Share → download 폴백
+│  └─ toss.js               # 토스 웹뷰 여부, 토스 뒤로가기(backEvent) 화면 스택
 └─ components/
    ├─ Countdown.jsx         # memo, 매초 리렌더를 여기로 격리
    ├─ SettingsSheet.jsx     # 출퇴근 시간 설정
@@ -17,5 +18,7 @@ src/
    ├─ Collection.jsx        # 도감 그리드
    └─ MemeMaker.jsx         # 짤 편집 + 캡처 영역
 ```
+
+앱인토스 설정은 `apps-in-toss.config.ts`, `npm run build`가 `afterworkbleep.ait`를 만든다.
 
 실행 방법과 문서는 [CLAUDE.md](CLAUDE.md) 참고.

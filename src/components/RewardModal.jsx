@@ -1,4 +1,6 @@
+import { useTossBack } from '../lib/toss';
 export default function RewardModal({ oath, isNew, onMakeMeme, onClose }) {
+  useTossBack(onClose);
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6">
       <div className="w-full max-w-sm rounded-3xl bg-white p-6 text-center">

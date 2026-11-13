@@ -1,6 +1,8 @@
+import { useTossBack } from '../lib/toss';
 import { useState } from 'react';
 
 export default function SettingsSheet({ settings, onSave, onClose }) {
+  useTossBack(onClose);
   const [start, setStart] = useState(settings.start);
   const [end, setEnd] = useState(settings.end);
   const same = start === end; // 같으면 야간 분기로 들어가 영원히 working → 보상 없음

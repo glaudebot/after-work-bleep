@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import oaths from '../data/oaths.json';
 import { RARITY } from './MemeMaker.jsx';
+import { inToss, useTossBack } from '../lib/toss';
 
 const VIEWS = [['all', '전체'], ['country', '국가별'], ['rarity', '등급별']];
 const RARE_FIRST = ['legendary', 'unique', 'epic', 'uncommon', 'common'];
@@ -21,13 +22,15 @@ export default function Collection({ collected, onPick, onClose }) {
   const owned = new Set(collected);
   const [view, setView] = useState('all');
   const [country, setCountry] = useState(null); // 국가별에서 고른 나라. null이면 나라 카드 그리드
+  const back = country ? () => setCountry(null) : onClose;
+  useTossBack(back);
   const pick = (v) => { setView(v); setCountry(null); };
   const groups = groupsOf(view);
   const shown = view === 'country' ? groups.filter(([k]) => k === country) : groups;
   const count = (list) => `${list.filter((o) => owned.has(o.id)).length}/${list.length}`;
   return (
     <section className="fixed inset-0 z-30 overflow-y-auto bg-gray-50 p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
-      <button className="text-gray-500" onClick={country ? () => setCountry(null) : onClose}>← 뒤로</button>
+      {!inToss && <button className="text-gray-500" onClick={back}>← 뒤로</button>}
       <h2 className="mb-3 mt-4 font-bold">
         비속어 도감 <span className="text-gray-400">{count(oaths)}</span>
       </h2>

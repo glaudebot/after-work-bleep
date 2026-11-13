@@ -9,7 +9,7 @@ const results = [];
 const check = (id, ok, note = '') => { results.push({ id, ok: !!ok, note }); };
 const at = (h, m = 0, s = 0) => new Date(2026, 10, 13, h, m, s);
 
-async function open(browser, { time, settings = { start: '09:00', end: '18:00' }, collected = [], lastReward = null }) {
+async function open(browser, { time, settings = { start: '09:00', end: '18:00' }, collected = [], lastReward = null, toss = false }) {
   const ctx = await browser.newContext({ viewport: { width: 375, height: 667 }, deviceScaleFactor: 2, acceptDownloads: true });
   await ctx.clock.install({ time });
   await ctx.addInitScript((d) => {
@@ -23,6 +23,7 @@ async function open(browser, { time, settings = { start: '09:00', end: '18:00' }
     Object.defineProperty(document, 'hidden', { get: () => hidden });
     window.__setHidden = (v) => { hidden = v; document.dispatchEvent(new Event('visibilitychange')); };
   }, { 'bleep:settings': settings, 'bleep:collected': collected, 'bleep:lastReward': lastReward });
+  if (toss) await ctx.addInitScript(() => { window.ReactNativeWebView = { postMessage() {} }; }); // T-24: 토스 웹뷰 흉내
   const p = await ctx.newPage();
   await p.goto(URL);
   await p.waitForTimeout(300);
@@ -204,6 +205,18 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
       await p.context().close();
     }
     check('T-20', moods.length === 0, moods.join(', '));
+
+    // T-24: 토스 웹뷰에서는 자체 ← 뒤로를 숨기고 토스 바 뒤로가기만 쓴다 (M4-2)
+    {
+      const errs = [];
+      p = await open(browser, { time: at(12), collected: ['es-caramba'], toss: true });
+      p.on('pageerror', (e) => errs.push(e.message));
+      const homeOk = (await label(p)) === '퇴근까지';
+      await p.getByRole('button', { name: '📖 도감' }).click();
+      const inCollection = await p.getByRole('button', { name: '← 뒤로' }).count();
+      check('T-24', inCollection === 0 && homeOk && errs.length === 0, `← 뒤로 ${inCollection}개, 에러 ${errs.join('; ') || '없음'}`);
+      await p.context().close();
+    }
 
     check('T-11', wide.every(([, ok]) => ok), wide.filter(([, ok]) => !ok).map(([n]) => n).join(', '));
   } finally {

@@ -4,6 +4,7 @@ import templates from '../data/templates.json';
 import { captureAndShare, preloadCapture } from '../lib/captureAndSave';
 import MemeCard, { BLEEP } from './MemeCard';
 import PickerSheet from './PickerSheet';
+import { inToss, useTossBack } from '../lib/toss';
 
 export const RARITY = { common: ['일반', '#6b7280'], uncommon: ['고급', '#16a34a'], epic: ['에픽', '#9333ea'], unique: ['유니크', '#dc2626'], legendary: ['전설', '#d97706'] };
 
@@ -14,6 +15,7 @@ export default function MemeMaker({ collected, initialOathId, onClose }) {
   const [templateId, setTemplateId] = useState(templates[0].id);
   const [picker, setPicker] = useState(null); // 'template' | 'word' | null
   const [busy, setBusy] = useState(false);
+  useTossBack(onClose);
   const cardRef = useRef(null);
   useEffect(() => { preloadCapture().catch(() => {}); }, []); // 실패는 저장 때 다시 시도
 
@@ -38,7 +40,7 @@ export default function MemeMaker({ collected, initialOathId, onClose }) {
   if (!oath) {
     return (
       <div className="fixed inset-0 z-40 bg-gray-50 p-5">
-        <button className="text-gray-500" onClick={onClose}>← 뒤로</button>
+        {!inToss && <button className="text-gray-500" onClick={onClose}>← 뒤로</button>}
         <p className="mt-10 text-center">아직 모은 단어가 없어요. 퇴근하고 받아보세요!</p>
       </div>
     );
@@ -46,7 +48,7 @@ export default function MemeMaker({ collected, initialOathId, onClose }) {
 
   return (
     <div className="fixed inset-0 z-40 overflow-y-auto bg-gray-50 p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
-      <button className="text-gray-500" onClick={onClose}>← 뒤로</button>
+      {!inToss && <button className="text-gray-500" onClick={onClose}>← 뒤로</button>}
 
       <div className="mt-4"><MemeCard template={template} oath={oath} name={xx} cardRef={cardRef} /></div>
 
