@@ -14,7 +14,7 @@ export default function Collection({ collected, onPick, onClose }) {
             <button key={o.id} onClick={() => onPick(o)}
               className="rounded-2xl bg-white p-3 text-center shadow-sm active:scale-95">
               <p className="text-xs">{o.country.split(' ')[0]}</p>
-              <p className="mt-1 truncate text-sm font-bold">{o.word}</p>
+              <p className="mt-1 break-keep text-sm font-bold [overflow-wrap:anywhere]">{o.word}</p>
             </button>
           ) : (
             <div key={o.id} className="rounded-2xl bg-gray-200 p-3 text-center text-gray-400">
