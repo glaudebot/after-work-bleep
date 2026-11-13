@@ -9,7 +9,7 @@ export default function MemeMaker({ collected, initialOathId, onClose }) {
   const [busy, setBusy] = useState(false);
   const cardRef = useRef(null);
 
-  const oath = owned.find((o) => o.id === oathId);
+  const oath = owned.find((o) => o.id === oathId) ?? owned[0];
   const xx = name.trim() || 'XX';
 
   const handleSave = async () => {
@@ -26,7 +26,14 @@ export default function MemeMaker({ collected, initialOathId, onClose }) {
     }
   };
 
-  if (!oath) return <p className="p-6 text-center">아직 모은 단어가 없어요. 퇴근하고 받아보세요!</p>;
+  if (!oath) {
+    return (
+      <div className="fixed inset-0 z-40 bg-gray-50 p-5">
+        <button className="text-gray-500" onClick={onClose}>← 뒤로</button>
+        <p className="mt-10 text-center">아직 모은 단어가 없어요. 퇴근하고 받아보세요!</p>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-40 overflow-y-auto bg-gray-50 p-5">
@@ -51,7 +58,7 @@ export default function MemeMaker({ collected, initialOathId, onClose }) {
       <div className="mt-3 flex gap-2 overflow-x-auto pb-2">
         {owned.map((o) => (
           <button key={o.id} onClick={() => setOathId(o.id)}
-            className={`shrink-0 rounded-full px-4 py-2 text-sm ${o.id === oathId ? 'bg-blue-500 text-white' : 'bg-white'}`}>
+            className={`shrink-0 rounded-full px-4 py-2 text-sm ${o.id === oath.id ? 'bg-blue-500 text-white' : 'bg-white'}`}>
             {o.word}
           </button>
         ))}

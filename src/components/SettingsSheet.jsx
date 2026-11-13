@@ -20,7 +20,8 @@ export default function SettingsSheet({ settings, onSave, onClose }) {
               className="mt-1 w-full rounded-xl bg-gray-100 p-3 text-base" />
           </label>
         </div>
-        <button className="mt-6 w-full rounded-xl bg-blue-500 py-4 font-semibold text-white"
+        <button className="mt-6 w-full rounded-xl bg-blue-500 py-4 font-semibold text-white disabled:bg-gray-300"
+          disabled={!start || !end}
           onClick={() => { onSave({ start, end }); onClose(); }}>
           저장
         </button>

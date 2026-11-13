@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import oaths from './data/oaths.json';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { getWorkPhase, todayKey } from './lib/time';
@@ -32,12 +32,15 @@ export default function App() {
   const [meme, setMeme] = useState(null);     // { oathId } | null
 
   // 퇴근 보상 (근무일 기준 하루 1회)
+  // ref 가드: 같은 렌더의 effect가 두 번 돌아도(StrictMode 등) lastReward 갱신 전 중복 지급 방지
+  const rewardedKeyRef = useRef(lastReward);
   const giveReward = useCallback(() => {
     const key = todayKey(work.workEnd);
-    if (lastReward === key) return;
+    if (lastReward === key || rewardedKeyRef.current === key) return;
+    rewardedKeyRef.current = key;
     const oath = drawOath(collected);
     const isNew = !collected.includes(oath.id);
-    if (isNew) setCollected((c) => [...c, oath.id]);
+    if (isNew) setCollected((c) => (c.includes(oath.id) ? c : [...c, oath.id]));
     setLastReward(key);
     setReward({ oath, isNew });
   }, [work.workEnd, lastReward, collected, setCollected, setLastReward]);
