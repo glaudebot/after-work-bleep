@@ -24,3 +24,4 @@
 
 ## 환경 메모
 - 2026-11-13: 이 클라우드 세션에서는 `developers-apps-in-toss.toss.im` 접속이 네트워크 정책으로 막혀 있다 (프록시 403). M4 시작 때 허용 호스트를 추가해야 한다.
+- 2026-11-13: 개인 환경 `after-work-bleep`을 만들어 `developers-apps-in-toss.toss.im`을 허용했다. 이 저장소 세션은 이 환경에서 연다. 다른 호스트(techchat, toss.im 블로그)는 웹 페이지 읽기 도구로 읽는다.
