@@ -4,6 +4,7 @@ export default {
   content: ['./index.html', './src/**/*.{js,jsx}'],
   theme: {
     extend: {
+      colors: { blue: { 500: '#3182f6' } }, // 토스 파란색 (2026-11-13 사용자)
       keyframes: {
         shake: {
           '0%, 100%': { transform: 'translate(0, 0) rotate(0)' },
