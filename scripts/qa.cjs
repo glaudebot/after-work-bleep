@@ -133,7 +133,14 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
     await p.screenshot({ path: `${OUT}/sheet-word.png` });
     await p.getByRole('dialog').getByRole('button', { name: /고쉬/ }).click();
     const bg = await p.locator('[data-card]').evaluate((el) => getComputedStyle(el).backgroundColor);
-    check('T-18', (await mark()) === '고쉬' && bg === 'rgb(31, 41, 55)', `단어 ${await mark()}, 마지막 템플릿 배경 ${bg}`);
+    const t18 = [await mark(), bg];
+    await p.getByRole('button', { name: /단어/ }).click();
+    await p.getByRole('dialog').getByRole('button', { name: /단어 없이/ }).click();
+    const bleep = await p.locator('[data-card] [data-mark]').evaluate((el) => [el.textContent, getComputedStyle(el).color]);
+    const meaning = await p.locator('[data-card]').getByText('뜻:').count();
+    await p.locator('[data-card]').screenshot({ path: `${OUT}/card-bleep.png` });
+    check('T-19', bleep[0] === '삐-' && bleep[1] === 'rgb(239, 68, 68)' && meaning === 0, bleep.join(' '));
+    check('T-18', t18[0] === '고쉬' && t18[1] === 'rgb(31, 41, 55)', `단어 ${t18[0]}, 마지막 템플릿 배경 ${t18[1]}`);
     await p.getByRole('button', { name: '← 뒤로' }).last().click(); // 짤(위에 겹침) → 도감
     const backToCol = await p.getByText('비속어 도감').isVisible();
     await p.getByRole('button', { name: '← 뒤로' }).click(); // 도감 → 메인

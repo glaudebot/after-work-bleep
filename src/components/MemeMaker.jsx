@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import oaths from '../data/oaths.json';
 import templates from '../data/templates.json';
 import { captureAndShare, preloadCapture } from '../lib/captureAndSave';
-import MemeCard from './MemeCard';
+import MemeCard, { BLEEP } from './MemeCard';
 import PickerSheet from './PickerSheet';
 
 const RARITY = { common: ['일반', '#6b7280'], rare: ['레어', '#2563eb'], epic: ['에픽', '#9333ea'], legendary: ['전설', '#d97706'] };
@@ -17,7 +17,7 @@ export default function MemeMaker({ collected, initialOathId, onClose }) {
   const cardRef = useRef(null);
   useEffect(() => { preloadCapture().catch(() => {}); }, []); // 실패는 저장 때 다시 시도
 
-  const oath = owned.find((o) => o.id === oathId) ?? owned[0];
+  const oath = owned.length && oathId === BLEEP.id ? BLEEP : owned.find((o) => o.id === oathId) ?? owned[0];
   const xx = name.trim() || 'XX';
   const template = templates.find((t) => t.id === templateId);
 
@@ -81,6 +81,12 @@ export default function MemeMaker({ collected, initialOathId, onClose }) {
       )}
       {picker === 'word' && (
         <PickerSheet title="단어 고르기" onClose={() => setPicker(null)}>
+          <button onClick={() => { setOathId(BLEEP.id); setPicker(null); }}
+            className={`rounded-2xl bg-gray-50 p-3 text-center ${oath.id === BLEEP.id ? 'ring-2 ring-blue-500' : ''}`}>
+            <p className="text-xs">단어 없이</p>
+            <p className="mt-1 font-black text-red-500">삐-</p>
+            <p className="mt-1 text-xs text-gray-400">빨간 삐- 처리</p>
+          </button>
           {owned.map((o) => (
             <button key={o.id} onClick={() => { setOathId(o.id); setPicker(null); }}
               className={`rounded-2xl bg-gray-50 p-3 text-center ${o.id === oath.id ? 'ring-2 ring-blue-500' : ''}`}>
