@@ -17,9 +17,8 @@ export default function Collection({ collected, onPick, onClose }) {
               <p className="mt-1 break-keep text-sm font-bold [overflow-wrap:anywhere]">{o.word}</p>
             </button>
           ) : (
-            <div key={o.id} className="rounded-2xl bg-gray-200 p-3 text-center text-gray-400">
+            <div key={o.id} className="flex min-h-16 items-center justify-center rounded-2xl bg-gray-200 p-3">
               <p className="text-xs font-black text-red-500">삐-</p>
-              <p className="mt-1 text-sm">???</p>
             </div>
           )
         )}
