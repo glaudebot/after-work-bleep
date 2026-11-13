@@ -20,22 +20,38 @@ function groupsOf(view) {
 export default function Collection({ collected, onPick, onClose }) {
   const owned = new Set(collected);
   const [view, setView] = useState('all');
+  const [country, setCountry] = useState(null); // 국가별에서 고른 나라. null이면 나라 카드 그리드
+  const pick = (v) => { setView(v); setCountry(null); };
+  const groups = groupsOf(view);
+  const shown = view === 'country' ? groups.filter(([k]) => k === country) : groups;
   const count = (list) => `${list.filter((o) => owned.has(o.id)).length}/${list.length}`;
   return (
     <section className="fixed inset-0 z-30 overflow-y-auto bg-gray-50 p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
-      <button className="text-gray-500" onClick={onClose}>← 뒤로</button>
+      <button className="text-gray-500" onClick={country ? () => setCountry(null) : onClose}>← 뒤로</button>
       <h2 className="mb-3 mt-4 font-bold">
         비속어 도감 <span className="text-gray-400">{count(oaths)}</span>
       </h2>
       <div className="mb-4 flex gap-2">
         {VIEWS.map(([v, label]) => (
-          <button key={v} aria-pressed={view === v} onClick={() => setView(v)}
+          <button key={v} aria-pressed={view === v} onClick={() => pick(v)}
             className={`rounded-full px-4 py-1.5 text-sm font-semibold ${view === v ? 'bg-gray-900 text-white' : 'bg-white text-gray-500 shadow-sm'}`}>
             {label}
           </button>
         ))}
       </div>
-      {groupsOf(view).map(([k, list]) => (
+      {view === 'country' && !country && (
+        <div className="grid grid-cols-3 gap-2">
+          {groups.map(([k, list]) => (
+            <button key={k} data-country onClick={() => setCountry(k)}
+              className="rounded-2xl bg-white p-3 text-center shadow-sm active:scale-95">
+              <p className="text-2xl">{k.split(' ')[0]}</p>
+              <p className="mt-1 break-keep text-xs font-bold">{k.split(' ').slice(1).join(' ')}</p>
+              <p className="text-xs text-gray-400">{count(list)}</p>
+            </button>
+          ))}
+        </div>
+      )}
+      {shown.map(([k, list]) => (
         <div key={k ?? 'all'} className="mb-5">
           {k && (
             <h3 data-group className="mb-2 text-sm font-bold" style={view === 'rarity' ? { color: RARITY[k][1] } : undefined}>
