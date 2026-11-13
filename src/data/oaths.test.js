@@ -13,3 +13,9 @@ test('단어: 형식·id 중복·등급 값', () => {
     assert.ok(RARITIES.includes(o.rarity), `${o.id}.rarity`);
   }
 });
+
+test('단어: 100개 이상, 등급 개수 55/25/12/6/2 (M2-1)', () => {
+  const n = Object.fromEntries(RARITIES.map((r) => [r, oaths.filter((o) => o.rarity === r).length]));
+  assert.ok(oaths.length >= 100);
+  assert.deepEqual(n, { common: 55, uncommon: 25, epic: 12, unique: 6, legendary: 2 });
+});
