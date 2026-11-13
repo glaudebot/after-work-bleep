@@ -5,6 +5,7 @@ import { captureAndShare, preloadCapture } from '../lib/captureAndSave';
 import MemeCard, { BLEEP } from './MemeCard';
 import PickerSheet from './PickerSheet';
 import { inToss, useTossBack } from '../lib/toss';
+import Icon from './Icon';
 
 export const RARITY = { common: ['일반', '#6b7280'], uncommon: ['고급', '#16a34a'], epic: ['에픽', '#9333ea'], unique: ['유니크', '#dc2626'], legendary: ['전설', '#d97706'] };
 
@@ -41,27 +42,27 @@ export default function MemeMaker({ collected, initialOathId, onClose }) {
   if (!oath) {
     return (
       <div className="fixed inset-0 z-40 bg-gray-50 p-5">
-        {!inToss && <button className="text-gray-500" onClick={onClose}>← 뒤로</button>}
-        <p className="mt-10 text-center">아직 모은 단어가 없어요. 퇴근하고 받아보세요!</p>
+        {!inToss && <button className="flex items-center gap-1 text-gray-500" onClick={onClose}><Icon name="back" />뒤로</button>}
+        <p className="mt-10 text-center">아직 모은 단어가 없어요. 퇴근하면 하나 받아요</p>
       </div>
     );
   }
 
   return (
     <div className="fixed inset-0 z-40 overflow-y-auto bg-gray-50 p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
-      {!inToss && <button className="text-gray-500" onClick={onClose}>← 뒤로</button>}
+      {!inToss && <button className="flex items-center gap-1 text-gray-500" onClick={onClose}><Icon name="back" />뒤로</button>}
 
       <div className="mt-4"><MemeCard template={template} oath={oath} name={xx} cardRef={cardRef} /></div>
 
       <input value={name} onChange={(e) => setName(e.target.value.slice(0, 10))}
-        placeholder="대상 이름 (최대 10자)"
+        placeholder="이름 (최대 10자)"
         className="mt-5 w-full rounded-xl bg-white p-4 shadow-sm" />
 
       {[['template', '템플릿', template.name], ['word', '단어', oath.word]].map(([key, label, value]) => (
         <button key={key} onClick={() => setPicker(key)}
           className="mt-3 flex w-full items-center justify-between rounded-xl bg-white p-4 shadow-sm">
           <span className="text-sm text-gray-500">{label}</span>
-          <span className="font-semibold">{value} ▾</span>
+          <span className="flex items-center gap-1 font-semibold">{value}<Icon name="down" /></span>
         </button>
       ))}
 
@@ -87,14 +88,14 @@ export default function MemeMaker({ collected, initialOathId, onClose }) {
           <button onClick={() => { setOathId(BLEEP.id); setPicker(null); }}
             className={`rounded-2xl bg-gray-50 p-3 text-center ${oath.id === BLEEP.id ? 'ring-2 ring-blue-500' : ''}`}>
             <p className="text-xs">단어 없이</p>
-            <p className="mt-1 font-black text-red-500">삐-</p>
+            <p className="mt-1 font-bold text-red-500">삐-</p>
             <p className="mt-1 text-xs text-gray-400">빨간 삐- 처리</p>
           </button>
           {owned.map((o) => (
             <button key={o.id} onClick={() => { setOathId(o.id); setPicker(null); }}
               className={`rounded-2xl bg-gray-50 p-3 text-center ${o.id === oath.id ? 'ring-2 ring-blue-500' : ''}`}>
               <p className="text-xs">{o.country}</p>
-              <p className="mt-1 truncate font-bold">{o.word}</p>
+              <p className="mt-1 truncate font-semibold">{o.word}</p>
               <p className="mt-1 text-xs font-semibold" style={{ color: RARITY[o.rarity][1] }}>{RARITY[o.rarity][0]}</p>
             </button>
           ))}

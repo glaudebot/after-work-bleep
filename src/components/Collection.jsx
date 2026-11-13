@@ -2,6 +2,7 @@ import { useState } from 'react';
 import oaths from '../data/oaths.json';
 import { RARITY } from './MemeMaker.jsx';
 import { inToss, useTossBack } from '../lib/toss';
+import Icon from './Icon';
 
 const VIEWS = [['all', '전체'], ['country', '국가별'], ['rarity', '등급별']];
 const RARE_FIRST = ['legendary', 'unique', 'epic', 'uncommon', 'common'];
@@ -30,8 +31,8 @@ export default function Collection({ collected, onPick, onClose }) {
   const count = (list) => `${list.filter((o) => owned.has(o.id)).length}/${list.length}`;
   return (
     <section className="fixed inset-0 z-30 overflow-y-auto bg-gray-50 p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
-      {!inToss && <button className="text-gray-500" onClick={back}>← 뒤로</button>}
-      <h2 className="mb-3 mt-4 font-bold">
+      {!inToss && <button className="flex items-center gap-1 text-gray-500" onClick={back}><Icon name="back" />뒤로</button>}
+      <h2 className="mb-3 mt-4 font-semibold">
         비속어 도감 <span className="text-gray-400">{count(oaths)}</span>
       </h2>
       <div className="mb-4 flex gap-2">
@@ -48,7 +49,7 @@ export default function Collection({ collected, onPick, onClose }) {
             <button key={k} data-country onClick={() => setCountry(k)}
               className="rounded-2xl bg-white p-3 text-center shadow-sm active:scale-95">
               <p className="text-2xl">{k.split(' ')[0]}</p>
-              <p className="mt-1 break-keep text-xs font-bold">{k.split(' ').slice(1).join(' ')}</p>
+              <p className="mt-1 break-keep text-xs font-semibold">{k.split(' ').slice(1).join(' ')}</p>
               <p className="text-xs text-gray-400">{count(list)}</p>
             </button>
           ))}
@@ -57,7 +58,7 @@ export default function Collection({ collected, onPick, onClose }) {
       {shown.map(([k, list]) => (
         <div key={k ?? 'all'} className="mb-5">
           {k && (
-            <h3 data-group className="mb-2 text-sm font-bold" style={view === 'rarity' ? { color: RARITY[k][1] } : undefined}>
+            <h3 data-group className="mb-2 text-sm font-semibold" style={view === 'rarity' ? { color: RARITY[k][1] } : undefined}>
               {view === 'rarity' ? RARITY[k][0] : k} <span className="font-normal text-gray-400">{count(list)}</span>
             </h3>
           )}
@@ -67,11 +68,11 @@ export default function Collection({ collected, onPick, onClose }) {
                 <button key={o.id} onClick={() => onPick(o)}
                   className="rounded-2xl bg-white p-3 text-center shadow-sm active:scale-95">
                   <p className="text-xs">{o.country.split(' ')[0]}</p>
-                  <p className="mt-1 break-keep text-sm font-bold [overflow-wrap:anywhere]">{o.word}</p>
+                  <p className="mt-1 break-keep text-sm font-semibold [overflow-wrap:anywhere]">{o.word}</p>
                 </button>
               ) : (
                 <div key={o.id} className="flex min-h-16 items-center justify-center rounded-2xl bg-gray-200 p-3">
-                  <p className="text-xs font-black text-red-500">삐-</p>
+                  <p className="text-xs font-bold text-red-500">삐-</p>
                 </div>
               )
             )}

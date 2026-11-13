@@ -15,7 +15,7 @@ export default function Burst({ word, onDone }) {
   return (
     <div data-burst className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/70 p-6" onClick={onDone}>
       {boom && (
-        <p className="mb-2 animate-pop rounded-2xl bg-white px-5 py-3 text-center text-3xl font-black text-red-500 shadow-lg">
+        <p className="mb-2 animate-pop rounded-2xl bg-white px-5 py-3 text-center text-3xl font-bold text-red-500 shadow-lg">
           {word}!
         </p>
       )}

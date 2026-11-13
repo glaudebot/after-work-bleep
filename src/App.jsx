@@ -9,7 +9,8 @@ import Collection from './components/Collection';
 import MemeMaker from './components/MemeMaker';
 import Character from './components/Character';
 import Burst from './components/Burst';
-import Tour from './components/Tour';
+import Tour, { BUBBLE } from './components/Tour';
+import Icon from './components/Icon';
 import book from './assets/book.webp';
 import camera from './assets/camera.webp';
 
@@ -110,9 +111,10 @@ export default function App() {
       </div>
 
       <header className={`relative flex items-center justify-between ${night ? 'text-white' : ''}`}>
-        <h1 className="text-xl font-black">퇴근 후 삐-처리</h1>
-        <button className={`text-sm ${night ? 'text-white/70' : 'text-gray-500'}`} onClick={() => setShowSettings(true)}>
-          {settings.start}~{settings.end} ⚙️
+        <h1 className="text-xl font-bold">퇴근 후 삐-처리</h1>
+        <button className={`flex items-center gap-2 text-sm tabular-nums ${night ? 'text-white/70' : 'text-gray-500'}`}
+          aria-label={`근무 시간 설정 ${settings.start}~${settings.end}`} onClick={() => setShowSettings(true)}>
+          {settings.start}~{settings.end} <Icon name="settings" />
         </button>
       </header>
 
@@ -123,6 +125,7 @@ export default function App() {
           phase={work.phase}
           onDone={handleCountdownDone}
         />
+        {touring && <p className={`absolute left-1/2 top-full mt-3 -translate-x-1/2 ${BUBBLE}`}>출근·퇴근까지 남은 시간이에요</p>}
       </section>
 
       <nav className={`fixed inset-x-0 bottom-0 flex gap-2 px-5 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))] ${touring ? 'pointer-events-none z-50' : ''}`}>

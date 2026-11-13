@@ -50,7 +50,7 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
   } catch (e) { t12 = false; note12 = '테스트 또는 빌드 실패'; }
   check('T-12', t12, note12);
 
-  const server = spawn('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort'], { stdio: 'ignore' });
+  const server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', 'preview', '--port', String(PORT), '--strictPort'], { stdio: 'ignore' });
   await new Promise((r) => setTimeout(r, 1500));
   const browser = await chromium.launch();
   const wide = [];
@@ -84,7 +84,7 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
     await p.evaluate(() => window.__setHidden(false));
     check('T-06', near(await clock(p), '05:59:00'), await clock(p));
 
-    await p.getByRole('button', { name: /⚙️/ }).click();
+    await p.getByRole('button', { name: /근무 시간 설정/ }).click();
     wide.push(['설정 시트', await noHScroll(p)]);
     const [s, e] = await p.locator('input[type=time]').all();
     const save = p.getByRole('button', { name: '저장' });
@@ -106,7 +106,7 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
       wide.push(['도감 국가별', await noHScroll(p)]);
       await p.locator('[data-country]', { hasText: '스페인' }).click();
       const byCountry = await heads(), esCells = await p.locator('.grid > *').count();
-      await p.getByRole('button', { name: '← 뒤로' }).click(); // 나라 카드로 돌아감
+      await p.getByRole('button', { name: '뒤로' }).click(); // 나라 카드로 돌아감
       const okCountry = cards === new Set(oaths.map((o) => o.country)).size && byCountry.join() === `🇪🇸 스페인 1/${es}` && esCells === es
         && (await p.locator('[data-country]').count()) === cards;
       await p.getByRole('button', { name: '등급별' }).click();
@@ -164,9 +164,9 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
     await p.locator('[data-card]').screenshot({ path: `${OUT}/card-bleep.png` });
     check('T-19', bleep[0] === '삐-' && bleep[1] === 'rgb(239, 68, 68)' && meaning === 0, bleep.join(' '));
     check('T-18', t18[0] === '고쉬' && t18[1] === 'rgb(31, 41, 55)', `단어 ${t18[0]}, 마지막 템플릿 배경 ${t18[1]}`);
-    await p.getByRole('button', { name: '← 뒤로' }).last().click(); // 짤(위에 겹침) → 도감
+    await p.getByRole('button', { name: '뒤로' }).last().click(); // 짤(위에 겹침) → 도감
     const backToCol = await p.getByText('비속어 도감').isVisible();
-    await p.getByRole('button', { name: '← 뒤로' }).click(); // 도감 → 메인
+    await p.getByRole('button', { name: '뒤로' }).click(); // 도감 → 메인
     check('T-17', backToCol && (await p.getByText('비속어 도감').count()) === 0 && (await p.getByText('퇴근까지').isVisible()));
     await p.screenshot({ path: `${OUT}/main.png` });
     await p.context().close();
@@ -207,15 +207,15 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
     }
     check('T-20', moods.length === 0, moods.join(', '));
 
-    // T-24: 토스 웹뷰에서는 자체 ← 뒤로를 숨기고 토스 바 뒤로가기만 쓴다 (M4-2)
+    // T-24: 토스 웹뷰에서는 자체 뒤로 버튼을 숨기고 토스 바 뒤로가기만 쓴다 (M4-2)
     {
       const errs = [];
       p = await open(browser, { time: at(12), collected: ['es-caramba'], toss: true });
       p.on('pageerror', (e) => errs.push(e.message));
       const homeOk = (await label(p)) === '퇴근까지';
       await p.getByRole('button', { name: '도감', exact: true }).click();
-      const inCollection = await p.getByRole('button', { name: '← 뒤로' }).count();
-      check('T-24', inCollection === 0 && homeOk && errs.length === 0, `← 뒤로 ${inCollection}개, 에러 ${errs.join('; ') || '없음'}`);
+      const inCollection = await p.getByRole('button', { name: '뒤로' }).count();
+      check('T-24', inCollection === 0 && homeOk && errs.length === 0, `뒤로 ${inCollection}개, 에러 ${errs.join('; ') || '없음'}`);
       await p.context().close();
     }
 
