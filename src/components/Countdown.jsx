@@ -12,9 +12,9 @@ function Countdown({ targetMs, phase, onDone }) {
 
   return (
     <div className="text-center">
-      <p className="text-sm text-gray-500">{LABEL[phase]}</p>
+      <p className="text-sm text-gray-600">{LABEL[phase]}</p>
       {/* tabular-nums: 숫자 폭 고정 → 매초 글자 흔들림 방지 */}
-      <p className="mt-1 text-5xl font-bold tabular-nums tracking-tight" aria-live="off">
+      <p className="text-[2.75rem] font-bold leading-tight tabular-nums tracking-tight" aria-live="off">
         {pad2(h)}:{pad2(m)}:{pad2(s)}
       </p>
     </div>

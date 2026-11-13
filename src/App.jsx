@@ -100,7 +100,7 @@ export default function App() {
         </button>
       </header>
 
-      <section className="relative mt-6 rounded-3xl bg-white p-8 shadow-sm">
+      <section className="relative mt-5 rounded-3xl bg-white/70 px-6 py-5 shadow-sm">
         <Countdown
           key={work.target.getTime()} // 목표가 바뀌면 타이머 리셋
           targetMs={work.target.getTime()}
@@ -110,10 +110,10 @@ export default function App() {
       </section>
 
       <nav className="fixed inset-x-0 bottom-0 flex gap-2 px-5 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
-        <button className="flex-1 rounded-xl bg-white py-4 font-semibold shadow-sm" onClick={() => setShowCollection(true)}>
+        <button className={`flex-[2] rounded-full py-4 font-semibold shadow-sm ${night ? 'bg-black/40 text-white' : 'bg-white'}`} onClick={() => setShowCollection(true)}>
           📖 도감
         </button>
-        <button className="flex-1 rounded-xl bg-blue-500 py-4 font-semibold text-white disabled:bg-gray-300"
+        <button className="flex-[3] rounded-full bg-blue-500 py-4 font-semibold text-white disabled:bg-gray-300"
           disabled={!collected.length} onClick={() => setMeme({ oathId: null })}>
           짤 만들기
         </button>
