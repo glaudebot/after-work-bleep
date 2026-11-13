@@ -1,8 +1,8 @@
 [
-  { "id": "basic", "name": "노란 기본형", "text": "아 우리 {XX}님\n{YY} 같네", "bg": "#fde047", "ink": "#111827", "sub": "#854d0e", "nameColor": "#2563eb", "markBg": "#000000", "markFg": "#ffffff" },
-  { "id": "praise", "name": "핑크 칭찬형", "text": "{XX}님 오늘도\n{YY} 그 자체", "bg": "#fbcfe8", "ink": "#111827", "sub": "#9d174d", "nameColor": "#db2777", "markBg": "#831843", "markFg": "#ffffff" },
+  { "id": "basic", "name": "노란 기본형", "text": "아 우리 {XX}님 보면\n저절로 나온다 {YY}", "bg": "#fde047", "ink": "#111827", "sub": "#854d0e", "nameColor": "#2563eb", "markBg": "#000000", "markFg": "#ffffff" },
+  { "id": "praise", "name": "핑크 칭찬형", "text": "{XX}님 오늘도\n칭찬 대신 {YY}", "bg": "#fbcfe8", "ink": "#111827", "sub": "#9d174d", "nameColor": "#db2777", "markBg": "#831843", "markFg": "#ffffff" },
   { "id": "commute", "name": "퇴근길형", "text": "퇴근길에 {XX}님 생각나서\n외쳤다 {YY}!", "bg": "#bae6fd", "ink": "#0f172a", "sub": "#075985", "nameColor": "#0369a1", "markBg": "#0c4a6e", "markFg": "#ffffff" },
   { "id": "minutes", "name": "회의록형", "text": "[회의록]\n{XX}님 발언 요약:\n{YY}", "bg": "#f3f4f6", "ink": "#111827", "sub": "#6b7280", "nameColor": "#4f46e5", "markBg": "#4f46e5", "markFg": "#ffffff" },
-  { "id": "breaking", "name": "속보형", "text": "[속보] {XX}님,\n오늘도 {YY} 판정", "bg": "#fecaca", "ink": "#111827", "sub": "#991b1b", "nameColor": "#dc2626", "markBg": "#b91c1c", "markFg": "#ffffff" },
-  { "id": "warning", "name": "다크 경고형", "text": "경고: {XX}님\n{YY} 수치 초과", "bg": "#1f2937", "ink": "#f9fafb", "sub": "#9ca3af", "nameColor": "#facc15", "markBg": "#facc15", "markFg": "#111827" }
+  { "id": "breaking", "name": "속보형", "text": "[속보] {XX}님 보고\n전 직원 \"{YY}\" 외쳐", "bg": "#fecaca", "ink": "#111827", "sub": "#991b1b", "nameColor": "#dc2626", "markBg": "#b91c1c", "markFg": "#ffffff" },
+  { "id": "warning", "name": "다크 경고형", "text": "경고: {XX}님 근처\n\"{YY}\" 발생 빈도 초과", "bg": "#1f2937", "ink": "#f9fafb", "sub": "#9ca3af", "nameColor": "#facc15", "markBg": "#facc15", "markFg": "#111827" }
 ]
