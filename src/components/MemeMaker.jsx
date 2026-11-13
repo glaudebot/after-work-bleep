@@ -28,7 +28,8 @@ export default function MemeMaker({ collected, initialOathId, onClose }) {
     setBusy(true);
     try {
       const result = await captureAndShare(cardRef.current, { filename: `bleep_${Date.now()}.png` });
-      if (result === 'downloaded') alert('이미지를 저장했어요');
+      if (result === 'saved') alert('사진첩에 저장했어요');
+      else if (result === 'downloaded') alert('이미지를 저장했어요');
     } catch (e) {
       console.error(e);
       alert('이미지 저장에 실패했어요. 다시 시도해 주세요.');
