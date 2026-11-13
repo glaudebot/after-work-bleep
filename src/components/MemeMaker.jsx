@@ -36,7 +36,7 @@ export default function MemeMaker({ collected, initialOathId, onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 z-40 overflow-y-auto bg-gray-50 p-5">
+    <div className="fixed inset-0 z-40 overflow-y-auto bg-gray-50 p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
       <button className="text-gray-500" onClick={onClose}>← 뒤로</button>
 
       {/* ▼ 캡처 대상 영역: Tailwind 클래스만 사용, 외부 이미지 X (CORS 이슈 방지) */}
