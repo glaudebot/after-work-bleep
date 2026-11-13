@@ -12,6 +12,7 @@
 | [docs/qa/QA_CHECKLIST.md](docs/qa/QA_CHECKLIST.md) | 마감 때 돌리는 점검 항목 |
 | [STACK.md](STACK.md) | 스택·버전과 변경 이력 |
 | [TODO.md](TODO.md) | 꼭지점에 안 들어간 요청·보류 |
+| [docs/APPS_IN_TOSS_DOCS.md](docs/APPS_IN_TOSS_DOCS.md) | 앱인토스 문서 읽는 순서 (llms.txt → .md → 설치된 SDK) |
 
 ## 구조·스택
 - React 19 + Tailwind CSS v3.4 + Vite, 캡처는 html2canvas. 백엔드 없음 (D-01, D-02).
@@ -39,3 +40,4 @@ npm run build    # 빌드 (타입 검사 없음: JS 프로젝트)
 - 스택이 바뀌면 그 자리에서 STACK.md와 꼭지점 Stack 항목에 적는다.
 - 작은 판단은 가장 단순한 방식으로 정하고 꼭지점 문서에 기록. 큰 설계 판단은 멈추고 묻는다.
 - D-08, D-09, D-14, D-15(핵심 설계)를 바꿀 때는 먼저 묻는다.
+- 앱인토스 문서는 [APPS_IN_TOSS_DOCS.md](docs/APPS_IN_TOSS_DOCS.md) 순서로 필요한 부분만 읽고, 알아낸 제약은 출처와 함께 꼭지점 문서에 적는다.
