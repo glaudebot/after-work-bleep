@@ -21,7 +21,7 @@ const SKY = {
 };
 
 // 등급 가중치 랜덤 뽑기 (미수집 단어 우선)
-const WEIGHT = { common: 60, rare: 25, epic: 12, legendary: 3 };
+const WEIGHT = { common: 55, uncommon: 25, epic: 12, unique: 6, legendary: 2 };
 function drawOath(collected) {
   const pool = oaths.filter((o) => !collected.includes(o.id));
   const list = pool.length ? pool : oaths; // 다 모으면 중복 허용

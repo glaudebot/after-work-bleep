@@ -2,11 +2,11 @@
   { "id": "en-fiddlesticks", "word": "피들스틱스", "original": "Fiddlesticks", "country": "🇬🇧 영국", "meaning": "에잇, 젠장 (바이올린 활)", "rarity": "common" },
   { "id": "en-gosh", "word": "고쉬", "original": "Gosh", "country": "🇺🇸 미국", "meaning": "세상에 (God의 순화)", "rarity": "common" },
   { "id": "en-fudge", "word": "퍼지", "original": "Fudge", "country": "🇺🇸 미국", "meaning": "아 놔 (초콜릿 퍼지)", "rarity": "common" },
-  { "id": "fr-punaise", "word": "퓌네즈", "original": "Punaise", "country": "🇫🇷 프랑스", "meaning": "빈대! (젠장 대신)", "rarity": "rare" },
+  { "id": "fr-punaise", "word": "퓌네즈", "original": "Punaise", "country": "🇫🇷 프랑스", "meaning": "빈대! (젠장 대신)", "rarity": "uncommon" },
   { "id": "fr-mince", "word": "맹스", "original": "Mince", "country": "🇫🇷 프랑스", "meaning": "얇다 → 아차", "rarity": "common" },
-  { "id": "de-mist", "word": "미스트", "original": "Mist", "country": "🇩🇪 독일", "meaning": "거름 → 망했다", "rarity": "rare" },
-  { "id": "es-miercoles", "word": "미에르콜레스", "original": "¡Miércoles!", "country": "🇪🇸 스페인", "meaning": "수요일! (발음이 비슷한 욕 대신)", "rarity": "epic" },
-  { "id": "jp-chikushou", "word": "칙쇼", "original": "畜生", "country": "🇯🇵 일본", "meaning": "제기랄 (짐승)", "rarity": "rare" },
+  { "id": "de-mist", "word": "미스트", "original": "Mist", "country": "🇩🇪 독일", "meaning": "거름 → 망했다", "rarity": "uncommon" },
+  { "id": "es-miercoles", "word": "미에르콜레스", "original": "¡Miércoles!", "country": "🇪🇸 스페인", "meaning": "수요일! (발음이 비슷한 욕 대신)", "rarity": "unique" },
+  { "id": "jp-chikushou", "word": "칙쇼", "original": "畜生", "country": "🇯🇵 일본", "meaning": "제기랄 (짐승)", "rarity": "uncommon" },
   { "id": "kr-shibal", "word": "십장생", "original": "십장생", "country": "🇰🇷 한국", "meaning": "장수의 상징 10가지", "rarity": "epic" },
-  { "id": "nl-potverdorie", "word": "폿페르도리", "original": "Potverdorie", "country": "🇳🇱 네덜란드", "meaning": "어머나 세상에", "rarity": "legendary" }
+  { "id": "nl-potverdorie", "word": "폿페르도리", "original": "Potverdorie", "country": "🇳🇱 네덜란드", "meaning": "어머나 세상에", "rarity": "unique" }
 ]

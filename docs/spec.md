@@ -57,10 +57,11 @@
 
   | 등급 | 가중치 |
   |---|---|
-  | common | 60 |
-  | rare | 25 |
+  | common | 55 |
+  | uncommon | 25 |
   | epic | 12 |
-  | legendary | 3 |
+  | unique | 6 |
+  | legendary | 2 |
 - 다 모았으면 전체에서 뽑는다 (중복 허용, NEW 표시 없음).
 - 앱을 열지 않은 날의 보상은 사라진다 (누적 없음).
 
