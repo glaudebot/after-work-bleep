@@ -9,10 +9,12 @@
 | 빌드 | Vite, @vitejs/plugin-react | 8.3.8, 6.3.0 | |
 | 캡처 | html2canvas | 1.4.1 | |
 | 테스트 | node:test | Node 내장 | `npm test` |
+| QA | playwright | 1.63.0 | `npm run qa` (scripts/qa.cjs), 결과 이미지는 `qa-out/` |
 
 ## 설정
 - `src/index.css`: Tailwind preflight의 `img{display:block}`을 `inline-block`으로 되돌린다. 그대로 두면 html2canvas 캡처에서 글자가 아래로 밀린다.
 - 환경변수 없음.
 
 ## 변경 이력
+> 2026-11-13: QA 자동화용 playwright 1.63.0 devDependency 추가 (M1-3).
 > 2026-11-13: Vite + React + Tailwind v3.4 + html2canvas 설정 추가. Tailwind v4는 캡처 실패로 v3.4로 고정.
