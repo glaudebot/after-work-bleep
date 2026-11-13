@@ -1,7 +1,7 @@
 import { useTossBack } from '../lib/toss';
 import { useState } from 'react';
 
-export default function SettingsSheet({ settings, onSave, onClose }) {
+export default function SettingsSheet({ title = '근무 시간 설정', settings, onSave, onClose }) {
   useTossBack(onClose);
   const [start, setStart] = useState(settings.start);
   const [end, setEnd] = useState(settings.end);
@@ -10,7 +10,7 @@ export default function SettingsSheet({ settings, onSave, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-black/40" onClick={onClose}>
       <div className="w-full rounded-t-3xl bg-white p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))]" onClick={(e) => e.stopPropagation()}>
-        <h2 className="text-lg font-bold">근무 시간 설정</h2>
+        <h2 className="text-lg font-bold">{title}</h2>
         <div className="mt-4 grid grid-cols-2 gap-3">
           <label className="text-sm text-gray-600">
             출근

@@ -9,6 +9,7 @@ import Collection from './components/Collection';
 import MemeMaker from './components/MemeMaker';
 import Character from './components/Character';
 import Burst from './components/Burst';
+import Tour from './components/Tour';
 import book from './assets/book.webp';
 import camera from './assets/camera.webp';
 
@@ -33,6 +34,19 @@ function drawOath(collected) {
 }
 
 export default function App() {
+  // 첫 실행 안내 (M4-3): 안내를 본 적 없고 모은 단어도 없는 폰만. 기존 사용자는 건너뜀
+  const [onboarding, setOnboarding] = useState(() => {
+    try {
+      const c = localStorage.getItem('bleep:collected');
+      return !localStorage.getItem('bleep:onboarded') && (c == null || c === '[]') ? 'tour' : null;
+    } catch { return null; }
+  });
+  const finishOnboarding = useCallback(() => {
+    setOnboarding(null);
+    try { localStorage.setItem('bleep:onboarded', 'true'); } catch { /* 다음에 한 번 더 보일 뿐 */ }
+  }, []);
+  const touring = onboarding === 'tour';
+
   const [settings, setSettings] = useLocalStorage('bleep:settings', { start: '09:00', end: '18:00' });
   const [collected, setCollected] = useLocalStorage('bleep:collected', []);
   const [lastReward, setLastReward] = useLocalStorage('bleep:lastReward', null);
@@ -66,8 +80,8 @@ export default function App() {
 
   // 앱을 퇴근 후에 처음 열었을 때도 보상 지급
   useEffect(() => {
-    if (work.phase === 'off') giveReward();
-  }, [work.phase]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (work.phase === 'off' && !onboarding) giveReward(); // 첫 실행이면 시간을 정한 뒤에 판단
+  }, [work.phase, onboarding]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 표정·배경은 30초마다, 화면으로 돌아올 때 다시 계산 (매초는 Countdown만, D-08)
   const [now, setNow] = useState(() => new Date());
@@ -102,7 +116,7 @@ export default function App() {
         </button>
       </header>
 
-      <section className="relative mt-5 rounded-3xl bg-white/70 px-6 py-5 shadow-sm">
+      <section className={`relative mt-5 rounded-3xl bg-white/70 px-6 py-5 shadow-sm ${touring ? 'z-50' : ''}`}>
         <Countdown
           key={work.target.getTime()} // 목표가 바뀌면 타이머 리셋
           targetMs={work.target.getTime()}
@@ -111,7 +125,7 @@ export default function App() {
         />
       </section>
 
-      <nav className="fixed inset-x-0 bottom-0 flex gap-2 px-5 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+      <nav className={`fixed inset-x-0 bottom-0 flex gap-2 px-5 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))] ${touring ? 'pointer-events-none z-50' : ''}`}>
         <button className={`flex-[2] rounded-full py-2 shadow-sm ${night ? 'bg-black/40' : 'bg-white'}`} aria-label="도감" onClick={() => setShowCollection(true)}>
           <img src={book} alt="" className="mx-auto h-10" draggable={false} />
         </button>
@@ -127,6 +141,10 @@ export default function App() {
 
       {showSettings && (
         <SettingsSheet settings={settings} onSave={setSettings} onClose={() => setShowSettings(false)} />
+      )}
+      {touring && <Tour onNext={() => setOnboarding('settings')} />}
+      {onboarding === 'settings' && (
+        <SettingsSheet title="출퇴근 시간부터 정해요" settings={settings} onSave={setSettings} onClose={finishOnboarding} />
       )}
       {reward && burst && <Burst word={reward.oath.word} onDone={endBurst} />}
       {reward && !burst && (

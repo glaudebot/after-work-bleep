@@ -9,7 +9,7 @@ const results = [];
 const check = (id, ok, note = '') => { results.push({ id, ok: !!ok, note }); };
 const at = (h, m = 0, s = 0) => new Date(2026, 10, 13, h, m, s);
 
-async function open(browser, { time, settings = { start: '09:00', end: '18:00' }, collected = [], lastReward = null, toss = false }) {
+async function open(browser, { time, settings = { start: '09:00', end: '18:00' }, collected = [], lastReward = null, toss = false, fresh = false }) {
   const ctx = await browser.newContext({ viewport: { width: 375, height: 667 }, deviceScaleFactor: 2, acceptDownloads: true });
   await ctx.clock.install({ time });
   await ctx.addInitScript((d) => {
@@ -22,7 +22,7 @@ async function open(browser, { time, settings = { start: '09:00', end: '18:00' }
     let hidden = false; // T-06: 화면 가림 흉내
     Object.defineProperty(document, 'hidden', { get: () => hidden });
     window.__setHidden = (v) => { hidden = v; document.dispatchEvent(new Event('visibilitychange')); };
-  }, { 'bleep:settings': settings, 'bleep:collected': collected, 'bleep:lastReward': lastReward });
+  }, fresh ? {} : { 'bleep:settings': settings, 'bleep:collected': collected, 'bleep:lastReward': lastReward, 'bleep:onboarded': true }); // fresh: 처음 여는 폰 (T-25)
   if (toss) await ctx.addInitScript(() => { window.ReactNativeWebView = { postMessage() {} }; }); // T-24: 토스 웹뷰 흉내
   const p = await ctx.newPage();
   await p.goto(URL);
@@ -189,6 +189,7 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
     await p.context().close();
     const ctx = await browser.newContext({ viewport: { width: 375, height: 667 }, reducedMotion: 'reduce' });
     await ctx.clock.install({ time: at(19) });
+    await ctx.addInitScript(() => localStorage.setItem('bleep:onboarded', 'true')); // 첫 실행 안내 건너뜀 (T-25)
     p = await ctx.newPage(); await p.goto(URL); await p.waitForTimeout(300);
     const reducedNow = (await burstShown(p)) === 0 && (await p.getByText('오늘도 퇴근 성공').count()) === 1;
     await ctx.close();
@@ -215,6 +216,21 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
       await p.getByRole('button', { name: '도감', exact: true }).click();
       const inCollection = await p.getByRole('button', { name: '← 뒤로' }).count();
       check('T-24', inCollection === 0 && homeOk && errs.length === 0, `← 뒤로 ${inCollection}개, 에러 ${errs.join('; ') || '없음'}`);
+      await p.context().close();
+    }
+
+    // T-25: 처음 여는 폰은 안내 → 출퇴근 시간 설정 뒤에 퇴근 보상, 다시 열면 안내 없음 (M4-3)
+    {
+      p = await open(browser, { time: at(19), fresh: true });
+      const tour = await p.getByRole('dialog', { name: '사용 안내' }).count();
+      const noRewardYet = (await burstShown(p)) + (await p.getByText('오늘도 퇴근 성공').count()) === 0;
+      await p.getByRole('button', { name: '다음' }).click();
+      const sheet = await p.getByText('출퇴근 시간부터 정해요').count();
+      await p.getByRole('button', { name: '저장' }).click(); await p.waitForTimeout(200);
+      const reward = await rewardShown(p);
+      await p.reload(); await p.waitForTimeout(300);
+      const again = await p.getByRole('dialog', { name: '사용 안내' }).count();
+      check('T-25', tour === 1 && noRewardYet && sheet === 1 && reward === 1 && again === 0, `안내 ${tour}, 보상 대기 ${noRewardYet}, 시트 ${sheet}, 보상 ${reward}, 재실행 안내 ${again}`);
       await p.context().close();
     }
 

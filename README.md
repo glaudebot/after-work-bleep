@@ -14,6 +14,7 @@ src/
 └─ components/
    ├─ Countdown.jsx         # memo, 매초 리렌더를 여기로 격리
    ├─ SettingsSheet.jsx     # 출퇴근 시간 설정
+   ├─ Tour.jsx              # 첫 실행 안내 (말풍선)
    ├─ RewardModal.jsx       # 퇴근 보상 뽑기 결과
    ├─ Collection.jsx        # 도감 그리드
    └─ MemeMaker.jsx         # 짤 편집 + 캡처 영역
