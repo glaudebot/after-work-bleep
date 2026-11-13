@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { useCountdown } from '../hooks/useCountdown';
 import { pad2, splitMs } from '../lib/time';
 
-const LABEL = { before: '출근까지', working: '퇴근까지', off: '내일 출근까지' };
+const LABEL = { before: '출근까지', working: '퇴근까지', off: '출근까지' };
 
 // memo: 부모가 리렌더돼도 props(target/phase)가 같으면 무시
 // 매초 리렌더는 이 컴포넌트 내부에서만 발생

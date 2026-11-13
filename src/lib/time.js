@@ -13,7 +13,7 @@ export const todayKey = (d = new Date()) =>
  * 현재 근무 상태와 카운트다운 목표 시각 계산
  * - before: 출근 전 → 출근까지
  * - working: 근무 중 → 퇴근까지
- * - off: 퇴근 후 → 내일 출근까지
+ * - off: 퇴근 후 → 다음 출근까지
  * 야간 근무(퇴근 < 출근, 예: 22:00~06:00)도 처리
  */
 export function getWorkPhase({ start, end }, now = new Date()) {
@@ -23,6 +23,7 @@ export function getWorkPhase({ start, end }, now = new Date()) {
   if (e <= s) {
     // 야간 근무: 자정을 넘김
     if (now < e) s.setDate(s.getDate() - 1); // 어제 시작한 근무가 진행 중
+    else if (now < s) return { phase: 'off', target: s, workEnd: e }; // 오늘 아침 퇴근 → 오늘 밤 출근까지
     else e.setDate(e.getDate() + 1);
   }
 
