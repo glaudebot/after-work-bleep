@@ -9,7 +9,7 @@ const results = [];
 const check = (id, ok, note = '') => { results.push({ id, ok: !!ok, note }); };
 const at = (h, m = 0, s = 0) => new Date(2026, 10, 13, h, m, s);
 
-async function open(browser, { time, settings = { start: '09:00', end: '18:00' }, collected = [], lastReward = null, toss = false, fresh = false }) {
+async function open(browser, { time, settings = { start: '09:00', end: '18:00' }, collected = [], lastReward = null, toss = false, fresh = false, ads = null }) {
   const ctx = await browser.newContext({ viewport: { width: 375, height: 667 }, deviceScaleFactor: 2, acceptDownloads: true });
   await ctx.clock.install({ time });
   await ctx.addInitScript((d) => {
@@ -24,6 +24,19 @@ async function open(browser, { time, settings = { start: '09:00', end: '18:00' }
     window.__setHidden = (v) => { hidden = v; document.dispatchEvent(new Event('visibilitychange')); };
   }, fresh ? {} : { 'bleep:settings': settings, 'bleep:collected': collected, 'bleep:lastReward': lastReward, 'bleep:onboarded': true }); // fresh: 처음 여는 폰 (T-25)
   if (toss) await ctx.addInitScript(() => { window.ReactNativeWebView = { postMessage() {} }; }); // T-24: 토스 웹뷰 흉내
+  // T-28, T-29: 가짜 광고 SDK. mode = ok | loadFail | showFail | shareCancel
+  if (ads) await ctx.addInitScript((mode) => {
+    const log = window.__ads = { loads: 0, shows: 0, alerts: [] };
+    window.alert = (m) => log.alerts.push(m);
+    const load = ({ onEvent, onError }) => { log.loads++; setTimeout(() => (mode === 'loadFail' ? onError(new Error('qa')) : onEvent({ type: 'loaded' })), 0); return () => {}; };
+    load.isSupported = () => true;
+    const show = () => { log.shows++; if (mode === 'showFail') throw new Error('qa'); return () => {}; };
+    window.__BLEEP_ADS__ = { id: 'qa', load, show };
+    if (mode === 'shareCancel') {
+      Object.defineProperty(navigator, 'canShare', { value: () => true, configurable: true });
+      navigator.share = () => Promise.reject(new DOMException('qa', 'AbortError'));
+    }
+  }, ads);
   const p = await ctx.newPage();
   await p.goto(URL);
   await p.waitForTimeout(300);
@@ -260,6 +273,31 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
       const rewardKept = (await modal()) === 1;
       await p.context().close();
       check('T-26', opened && inert && esc && outside && fallback && rewardKept, `열림 ${opened}, 뒤 비활성 ${inert}, Esc ${esc}, 바깥 탭 ${outside}, 대체 코드 ${fallback}, 보상 창 유지 ${rewardKept}`);
+    }
+
+    // T-28, T-29: 저장이 끝난 뒤 전면 광고. 실패해도 저장은 성공, 하루 1번, 공유 취소면 안 띄움 (M4.1-2)
+    {
+      const run = async (mode, saves = 1) => {
+        const q = await open(browser, { time: at(12), collected: ['es-caramba'], ads: mode });
+        await q.getByRole('button', { name: '짤 만들기' }).click(); await q.waitForTimeout(100);
+        let downloads = 0;
+        q.on('download', () => downloads++);
+        for (let i = 0; i < saves; i++) {
+          await q.getByRole('button', { name: /이미지 저장/ }).click();
+          await q.waitForFunction(() => !document.querySelector('button[disabled]'), null, { timeout: 10_000 }).catch(() => {});
+          await q.waitForTimeout(300);
+        }
+        const r = await q.evaluate(() => ({ ...window.__ads, lastAd: localStorage.getItem('bleep:lastAd') }));
+        await q.context().close();
+        return { ...r, downloads, failed: r.alerts.some((m) => m.includes('실패')) };
+      };
+      const loadFail = await run('loadFail'), showFail = await run('showFail');
+      check('T-28', loadFail.downloads === 1 && !loadFail.failed && loadFail.shows === 0
+        && showFail.downloads === 1 && !showFail.failed && showFail.shows === 1,
+        `불러오기 실패: 저장 ${loadFail.downloads} 광고 ${loadFail.shows} / 띄우기 실패: 저장 ${showFail.downloads} 광고 ${showFail.shows}`);
+      const twice = await run('ok', 2), cancel = await run('shareCancel');
+      check('T-29', twice.downloads === 2 && twice.shows === 1 && twice.lastAd === '2026-11-13' && cancel.shows === 0 && cancel.lastAd === null,
+        `두 번 저장: 광고 ${twice.shows} (lastAd ${twice.lastAd}), 공유 취소: 광고 ${cancel.shows}`);
     }
 
     check('T-11', wide.every(([, ok]) => ok), wide.filter(([, ok]) => !ok).map(([n]) => n).join(', '));
