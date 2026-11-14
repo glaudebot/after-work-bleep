@@ -8,6 +8,15 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* 모달 뒤 화면이 따라 스크롤되지 않게 (M4-4). ::backdrop은 overflow가 있어야 스크롤 컨테이너가 된다 */
+dialog:modal {
+  overscroll-behavior: contain;
+}
+dialog::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
 /*
  * html2canvas는 <img>를 넣어 글꼴 baseline을 잰다. Tailwind preflight의
  * img { display: block } 때문에 이 측정이 틀어져 캡처한 글자가 아래로 밀린다.

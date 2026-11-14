@@ -234,6 +234,34 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
       await p.context().close();
     }
 
+    // T-26: 시트·보상 창은 네이티브 모달. 뒤 화면 비활성화, Esc·바깥 탭으로 닫힘, 보상 창은 바깥 탭으로 안 닫힘 (M4-4)
+    {
+      p = await open(browser, { time: at(12) });
+      const modal = () => p.locator('dialog:modal').count();
+      const openSheet = () => p.getByRole('button', { name: /근무 시간 설정/ }).click();
+      await openSheet();
+      const opened = (await modal()) === 1 && (await p.getByRole('dialog', { name: '근무 시간 설정' }).count()) === 1;
+      const inert = await p.evaluate(() => { const b = document.querySelector('nav button'); b.focus(); return document.activeElement !== b; });
+      await p.keyboard.press('Escape'); await p.waitForTimeout(100);
+      const esc = (await modal()) === 0;
+      await openSheet(); await p.mouse.click(180, 60); await p.waitForTimeout(100);
+      const outside = (await modal()) === 0;
+      // closedby를 모르는 브라우저 흉내: 합성 클릭은 네이티브 바깥 탭 닫기를 일으키지 않으므로 대체 코드만 검사된다
+      await p.evaluate(() => { delete HTMLDialogElement.prototype.closedBy; });
+      await openSheet();
+      await p.evaluate(() => document.querySelector('dialog h2').dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: 180, clientY: 600 })));
+      const insideKept = (await modal()) === 1;
+      await p.evaluate(() => document.querySelector('dialog').dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: 180, clientY: 60 })));
+      await p.waitForTimeout(100);
+      const fallback = insideKept && (await modal()) === 0;
+      await p.context().close();
+      p = await open(browser, { time: at(19) });
+      await rewardShown(p); await p.mouse.click(10, 10); await p.waitForTimeout(100);
+      const rewardKept = (await modal()) === 1;
+      await p.context().close();
+      check('T-26', opened && inert && esc && outside && fallback && rewardKept, `열림 ${opened}, 뒤 비활성 ${inert}, Esc ${esc}, 바깥 탭 ${outside}, 대체 코드 ${fallback}, 보상 창 유지 ${rewardKept}`);
+    }
+
     check('T-11', wide.every(([, ok]) => ok), wide.filter(([, ok]) => !ok).map(([n]) => n).join(', '));
   } finally {
     await browser.close();
