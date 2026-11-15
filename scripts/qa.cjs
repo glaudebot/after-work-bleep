@@ -23,7 +23,11 @@ async function open(browser, { time, settings = { start: '09:00', end: '18:00' }
     Object.defineProperty(document, 'hidden', { get: () => hidden });
     window.__setHidden = (v) => { hidden = v; document.dispatchEvent(new Event('visibilitychange')); };
   }, fresh ? {} : { 'bleep:settings': settings, 'bleep:collected': collected, 'bleep:lastReward': lastReward, 'bleep:onboarded': true }); // fresh: 처음 여는 폰 (T-25)
-  if (toss) await ctx.addInitScript(() => { window.ReactNativeWebView = { postMessage() {} }; }); // T-24: 토스 웹뷰 흉내
+  if (toss) await ctx.addInitScript(() => { // T-24: 토스 웹뷰 흉내. T-31: SDK가 보낸 메시지를 모은다
+    window.__bridgeMethods__ = ['closeView', '__subscribeAppEvent', '__unsubscribeAppEvent'];
+    window.__toss = [];
+    window.ReactNativeWebView = { postMessage: (m) => window.__toss.push(JSON.parse(m)) };
+  });
   // T-28, T-29: 가짜 광고 SDK. mode = ok | loadFail | showFail | shareCancel
   if (ads) await ctx.addInitScript((mode) => {
     const log = window.__ads = { loads: 0, shows: 0, alerts: [] };
@@ -244,6 +248,29 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
       await p.reload(); await p.waitForTimeout(300);
       const again = await p.getByRole('dialog', { name: '사용 안내' }).count();
       check('T-25', tour === 1 && noRewardYet && sheet === 1 && reward === 1 && again === 0, `안내 ${tour}, 보상 대기 ${noRewardYet}, 시트 ${sheet}, 보상 ${reward}, 재실행 안내 ${again}`);
+      await p.context().close();
+    }
+
+    // T-31: 토스 바 뒤로가기. 첫 화면(처음 연 폰은 안내 화면)이면 미니앱 종료, 도감 위에서는 도감만 닫힘 (2026-11-15 심사 반려)
+    {
+      const back = (pg) => pg.evaluate(() => {
+        const sub = window.__toss.find((m) => m.body?.args?.[0]?.method === 'backEvent').body.args[0].subscriptionId;
+        window.nativeEmitter.emit('postMessage/appsInTossEvent', { subscriptionId: sub, kind: 'event' });
+      });
+      const closed = (pg) => pg.evaluate(() => window.__toss.some((m) => m.body?.method === 'closeView'));
+      p = await open(browser, { time: at(12), fresh: true, toss: true });
+      const tour = await p.getByRole('dialog', { name: '사용 안내' }).count();
+      await back(p); await p.waitForTimeout(200);
+      const tourClose = await closed(p);
+      await p.context().close();
+      p = await open(browser, { time: at(12), toss: true });
+      await p.getByRole('button', { name: '도감', exact: true }).click();
+      await back(p); await p.waitForTimeout(200);
+      const collClose = await closed(p);
+      const home = await p.getByRole('button', { name: '도감', exact: true }).isVisible();
+      await back(p); await p.waitForTimeout(200);
+      const homeClose = await closed(p);
+      check('T-31', tour === 1 && tourClose && !collClose && home && homeClose, `안내 화면 종료 ${tourClose}, 도감에서 종료 안 함 ${!collClose}, 홈 복귀 ${home}, 홈에서 종료 ${homeClose}`);
       await p.context().close();
     }
 

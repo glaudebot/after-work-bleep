@@ -26,7 +26,7 @@ export function useTossBack(handler) {
 
 if (inToss) {
   try {
-    graniteEvent.addEventListener('backEvent', { onEvent: onBack });
+    graniteEvent.addEventListener('backEvent', { onEvent: onBack, onError: console.error });
   } catch (e) {
     console.error(e);
   }

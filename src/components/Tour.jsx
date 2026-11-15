@@ -1,10 +1,8 @@
-import { useTossBack } from '../lib/toss';
-
 export const BUBBLE = 'whitespace-nowrap rounded-2xl bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow';
 
 // 첫 실행 안내 (M4-3): 홈 위를 어둡게 깔고 시계·도감·짤 버튼에 말풍선. 시계와 버튼은 App에서 z-50으로 올려 밝게 보이고, 시계 말풍선은 App이 시계 박스 바로 아래에 붙인다
+// 뒤로가기를 받지 않는다: 처음 연 폰은 이 안내가 첫 화면이라 뒤로가기는 미니앱 종료여야 함 (2026-11-15 심사 반려 2)
 export default function Tour({ onNext }) {
-  useTossBack(onNext);
   return (
     <div role="dialog" aria-label="사용 안내" className="fixed inset-0 z-40 bg-black/60">
       <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 px-8 text-center text-white">
