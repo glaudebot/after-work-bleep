@@ -9,7 +9,7 @@ const results = [];
 const check = (id, ok, note = '') => { results.push({ id, ok: !!ok, note }); };
 const at = (h, m = 0, s = 0) => new Date(2026, 10, 13, h, m, s);
 
-async function open(browser, { time, settings = { start: '09:00', end: '18:00' }, collected = [], lastReward = null, toss = false, fresh = false, ads = null }) {
+async function open(browser, { time, settings = { start: '09:00', end: '18:00' }, collected = ['es-caramba'], lastReward = null, toss = false, fresh = false, ads = null }) {
   const ctx = await browser.newContext({ viewport: { width: 375, height: 667 }, deviceScaleFactor: 2, acceptDownloads: true });
   await ctx.clock.install({ time });
   await ctx.addInitScript((d) => {
@@ -248,6 +248,20 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
       await p.reload(); await p.waitForTimeout(300);
       const again = await p.getByRole('dialog', { name: '사용 안내' }).count();
       check('T-25', tour === 1 && noRewardYet && sheet === 1 && reward === 1 && again === 0, `안내 ${tour}, 보상 대기 ${noRewardYet}, 시트 ${sheet}, 보상 ${reward}, 재실행 안내 ${again}`);
+      await p.context().close();
+    }
+
+    // T-32: 근무 중에 처음 열면 안내 → 시간 설정 뒤 첫 단어 선물. 퇴근 보상은 그대로 남고, 다시 열면 안 뜸 (2026-11-23 사용자)
+    {
+      p = await open(browser, { time: at(12), fresh: true });
+      await p.getByRole('button', { name: '다음' }).click();
+      await p.getByRole('button', { name: '저장' }).click(); await p.waitForTimeout(200);
+      await rewardShown(p); // 펑 연출 넘기기
+      const gift = (await p.getByText('첫 단어 선물이에요').count()) === 1;
+      const saved = await p.evaluate(() => [JSON.parse(localStorage.getItem('bleep:collected')).length, localStorage.getItem('bleep:lastReward')]);
+      await p.reload(); await p.waitForTimeout(300);
+      const again = (await burstShown(p)) + (await p.locator('dialog:modal').count());
+      check('T-32', gift && saved[0] === 1 && JSON.parse(saved[1]) === null && again === 0, `선물 ${gift}, 모은 수 ${saved[0]}, 퇴근 보상 기록 ${saved[1]}, 재실행 ${again}`);
       await p.context().close();
     }
 

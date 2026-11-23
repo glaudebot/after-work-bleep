@@ -1,9 +1,9 @@
 import Modal from './Modal';
-export default function RewardModal({ oath, isNew, onMakeMeme, onClose }) {
+export default function RewardModal({ oath, isNew, welcome, onMakeMeme, onClose }) {
   return (
-    <Modal label="퇴근 보상" onClose={onClose}
+    <Modal label={welcome ? '첫 단어' : '퇴근 보상'} onClose={onClose}
       className="w-[calc(100%-3rem)] max-w-sm rounded-3xl p-6 text-center backdrop:bg-black/50">
-      <p className="text-sm text-gray-500">오늘도 퇴근 성공</p>
+      <p className="text-sm text-gray-500">{welcome ? '첫 단어 선물이에요' : '오늘도 퇴근 성공'}</p>
       <p className="mt-2 text-xs text-gray-400">{oath.country}</p>
       <p className="mt-1 text-3xl font-bold">{oath.word}</p>
       <p className="text-sm text-gray-500">{oath.original}</p>

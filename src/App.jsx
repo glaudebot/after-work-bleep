@@ -70,18 +70,26 @@ export default function App() {
     const key = todayKey(work.workEnd);
     if (lastReward === key || rewardedKeyRef.current === key) return;
     rewardedKeyRef.current = key;
+    setLastReward(key);
+    draw();
+  }, [work.workEnd, lastReward, collected, setCollected, setLastReward]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // welcome: 첫 단어 선물. 퇴근 보상(lastReward)은 쓰지 않는다
+  function draw(welcome) {
     const oath = drawOath(collected);
     const isNew = !collected.includes(oath.id);
     if (isNew) setCollected((c) => (c.includes(oath.id) ? c : [...c, oath.id]));
-    setLastReward(key);
-    setReward({ oath, isNew });
+    setReward({ oath, isNew, welcome });
     // 동작 줄이기를 켠 기기는 연출 없이 바로 보상 창
     setBurst(!matchMedia('(prefers-reduced-motion: reduce)').matches);
-  }, [work.workEnd, lastReward, collected, setCollected, setLastReward]);
+  }
 
-  // 앱을 퇴근 후에 처음 열었을 때도 보상 지급
+  // 앱을 퇴근 후에 처음 열었을 때도 보상 지급. 첫 실행이면 시간을 정한 뒤에 판단
+  // 근무 중인데 모은 단어가 없으면(첫 실행 등) 할 게 없으니 한 번 뽑아 준다 (2026-11-23 사용자)
   useEffect(() => {
-    if (work.phase === 'off' && !onboarding) giveReward(); // 첫 실행이면 시간을 정한 뒤에 판단
+    if (onboarding) return;
+    if (work.phase === 'off') giveReward();
+    else if (!collected.length) draw(true);
   }, [work.phase, onboarding]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 표정·배경은 30초마다, 화면으로 돌아올 때 다시 계산 (매초는 Countdown만, D-08)
