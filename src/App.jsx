@@ -42,7 +42,9 @@ export default function App() {
       return !localStorage.getItem('bleep:onboarded') && (c == null || c === '[]') ? 'tour' : null;
     } catch { return null; }
   });
+  const firstRunRef = useRef(false); // 첫 실행 안내를 막 끝냄: 평생 한 번
   const finishOnboarding = useCallback(() => {
+    firstRunRef.current = true;
     setOnboarding(null);
     try { localStorage.setItem('bleep:onboarded', 'true'); } catch { /* 다음에 한 번 더 보일 뿐 */ }
   }, []);
@@ -85,11 +87,12 @@ export default function App() {
   }
 
   // 앱을 퇴근 후에 처음 열었을 때도 보상 지급. 첫 실행이면 시간을 정한 뒤에 판단
-  // 근무 중인데 모은 단어가 없으면(첫 실행 등) 할 게 없으니 한 번 뽑아 준다 (2026-11-23 사용자)
+  // 처음 깔고 연 날 근무 중이면 할 게 없으니 한 번 뽑아 준다. 평생 한 번 (2026-11-23 사용자)
   useEffect(() => {
     if (onboarding) return;
     if (work.phase === 'off') giveReward();
-    else if (!collected.length) draw(true);
+    else if (firstRunRef.current) draw(true);
+    firstRunRef.current = false;
   }, [work.phase, onboarding]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 표정·배경은 30초마다, 화면으로 돌아올 때 다시 계산 (매초는 Countdown만, D-08)
