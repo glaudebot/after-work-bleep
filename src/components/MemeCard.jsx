@@ -8,7 +8,7 @@ export default function MemeCard({ template: t, oath, name, cardRef }) {
     <div ref={cardRef} data-card={cardRef ? '' : undefined} style={{ background: t.bg }}
       className="mx-auto aspect-square w-full max-w-sm rounded-3xl p-6 flex flex-col justify-center">
       {!bleep && <p className="text-xs font-semibold" style={{ color: t.sub }}>{oath.country} · {oath.original}</p>}
-      <p className="mt-3 break-keep text-3xl font-black leading-snug" style={{ color: t.ink }}>
+      <p className="mt-3 break-keep text-3xl font-black leading-snug [overflow-wrap:anywhere]" style={{ color: t.ink }}>
         {parts.map((p, i) =>
           p === '{XX}' ? <span key={i} className="break-all" style={{ color: t.nameColor }}>{name}</span>
           : p === '{YY}' ? <span key={i} data-mark="" className={bleep ? undefined : "px-2"} style={bleep ? { color: '#ef4444' } : { background: t.markBg, color: t.markFg }}>{oath.word}</span>

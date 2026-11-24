@@ -177,7 +177,7 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
     await p.getByRole('dialog').getByRole('button', { name: /고쉬/ }).click();
     // T-18: 단어를 바꾸면 카드가 바로 바뀌고, 템플릿 시트에는 그 분류와 공용만 (2026-11-24)
     const shown = async () => { await p.getByRole('button', { name: /템플릿/ }).click(); const n = await p.getByRole('dialog').locator('button[aria-label]').allTextContents(); await p.keyboard.press('Escape'); await p.waitForTimeout(100); return n.length; };
-    const want = (type) => templates.filter((t) => t.type === type || t.type === 'common').length;
+    const want = (type) => 1 + templates.filter((t) => t.type === type || t.type === 'common').length; // 1: 직접 쓰기
     const curName = () => p.getByRole('button', { name: /템플릿/ }).textContent();
     const t18 = [await mark(), await shown() === want('interjection')];
     await pickWord(/미에르콜레스/);
@@ -189,6 +189,26 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
     const bleep = await p.locator('[data-card] [data-mark]').evaluate((el) => [el.textContent, getComputedStyle(el).color]);
     const meaning = await p.locator('[data-card]').getByText('뜻:').count();
     await p.locator('[data-card]').screenshot({ path: `${OUT}/card-bleep.png` });
+    // T-33: 직접 쓰기. 3줄·15자 제한, 단어는 끝에, 배경색, 이름 칸 숨김, 다시 열어도 남음 (2026-11-24 사용자)
+    {
+      await p.getByRole('button', { name: /템플릿/ }).click();
+      await p.getByRole('dialog').getByRole('button', { name: '직접 쓰기' }).click();
+      const noName = (await p.getByPlaceholder(/이름/).count()) === 0;
+      await p.getByLabel('직접 쓸 문장').fill('일이삼사오육칠팔구십일이삼사오육칠\n둘째 줄\n셋째 줄\n넷째 줄');
+      const val = await p.getByLabel('직접 쓸 문장').inputValue();
+      await p.getByRole('button', { name: '배경색 3' }).click();
+      const card = () => p.locator('[data-card]').evaluate((el) => [el.innerText, getComputedStyle(el).backgroundColor]);
+      const [txt, bg] = await card();
+      const fits = await p.evaluate(() => { const c = document.querySelector('[data-card]'), r = c.getBoundingClientRect(); return [...c.querySelectorAll('*')].every((el) => el.getBoundingClientRect().right <= r.right + 0.5); });
+      const ok = val === '일이삼사오육칠팔구십일이삼사오\n둘째 줄\n셋째 줄' && txt.includes(`셋째 줄 ${await mark()}`) && bg === 'rgb(191, 219, 254)';
+      await p.locator('[data-card]').screenshot({ path: `${OUT}/card-custom.png` });
+      await p.getByRole('button', { name: /템플릿/ }).click();
+      await p.getByRole('dialog').getByRole('button', { name: '인사형' }).click();
+      const back = (await p.getByPlaceholder(/이름/).count()) === 1;
+      const kept = await p.evaluate(() => JSON.parse(localStorage.getItem('bleep:custom')));
+      check('T-33', noName && ok && fits && back && kept.text === val && kept.bg === '#bfdbfe', `이름 칸 숨김 ${noName}, 안 넘침 ${fits}, 입력 ${JSON.stringify(val)}, 카드 ${JSON.stringify(txt)} ${bg}, 저장 ${JSON.stringify(kept)}`);
+    }
+
     check('T-19', bleep[0] === '삐-' && bleep[1] === 'rgb(239, 68, 68)' && meaning === 0, bleep.join(' '));
     check('T-18', t18[0] === '고쉬' && t18[1] && t18[2], `단어 ${t18[0]}, 감탄사 시트 ${t18[1]}, 명사로 바꾸면 ${nounName}`);
     await p.getByRole('button', { name: '뒤로' }).last().click(); // 짤(위에 겹침) → 도감

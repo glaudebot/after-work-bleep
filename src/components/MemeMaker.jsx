@@ -6,7 +6,13 @@ import { preloadAd, showAdAfterSave } from '../lib/ads';
 import MemeCard, { BLEEP } from './MemeCard';
 import PickerSheet from './PickerSheet';
 import { inToss, useTossBack } from '../lib/toss';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 import Icon from './Icon';
+
+// 직접 쓰기 (2026-11-24 사용자): 문장은 사용자가 쓰고, 단어는 마지막 줄 끝에 붙는다. 최근 1개만 저장
+const CUSTOM_BG = ['#fef08a', '#fbcfe8', '#bfdbfe', '#bbf7d0', '#fed7aa', '#e9d5ff'];
+const clampText = (v) => v.replace(/[{}]/g, '').split('\n').slice(0, 3).map((l) => l.slice(0, 15)).join('\n');
+const customTemplate = ({ text, bg }) => ({ ...templates[0], id: 'custom', name: '직접 쓰기', bg, text: `${String(text ?? '').trim() || '여기에 문장을 써요'} {YY}` });
 
 export const RARITY = { common: ['일반', '#6b7280'], uncommon: ['고급', '#16a34a'], epic: ['에픽', '#9333ea'], unique: ['유니크', '#dc2626'], legendary: ['전설', '#d97706'] };
 
@@ -17,6 +23,7 @@ export default function MemeMaker({ collected, initialOathId, onClose }) {
   const [templateId, setTemplateId] = useState(templates[0].id);
   const [picker, setPicker] = useState(null); // 'template' | 'word' | null
   const [busy, setBusy] = useState(false);
+  const [custom, setCustom] = useLocalStorage('bleep:custom', { text: '', bg: CUSTOM_BG[0] });
   useTossBack(onClose);
   const cardRef = useRef(null);
   useEffect(() => { preloadCapture().catch(() => {}); preloadAd(); }, []); // 실패는 저장 때 다시 시도
@@ -25,7 +32,8 @@ export default function MemeMaker({ collected, initialOathId, onClose }) {
   const xx = name.trim() || 'XX';
   // 단어 분류(감탄사·명사·사람)에 맞는 것과 공용만. 단어 없이(삐-)는 전부 (2026-11-24 사용자)
   const list = templates.filter((t) => !oath?.type || t.type === 'common' || t.type === oath.type);
-  const template = list.find((t) => t.id === templateId) ?? list[0];
+  const isCustom = templateId === 'custom';
+  const template = isCustom ? customTemplate(custom) : list.find((t) => t.id === templateId) ?? list[0];
 
   const handleSave = async () => {
     if (!cardRef.current || busy) return;
@@ -58,9 +66,24 @@ export default function MemeMaker({ collected, initialOathId, onClose }) {
 
       <div className="mt-4"><MemeCard template={template} oath={oath} name={xx} cardRef={cardRef} /></div>
 
-      <input value={name} onChange={(e) => setName(e.target.value.slice(0, 10))}
-        placeholder="이름 (최대 10자)"
-        className="mt-5 w-full rounded-xl bg-white p-4 shadow-sm" />
+      {isCustom ? (
+        <>
+          <textarea value={custom.text} rows={3} aria-label="직접 쓸 문장"
+            onChange={(e) => setCustom({ ...custom, text: clampText(e.target.value) })}
+            placeholder={'문장을 써요 (3줄, 한 줄 15자)\n단어는 마지막 줄 끝에 붙어요'}
+            className="mt-5 w-full resize-none rounded-xl bg-white p-4 shadow-sm" />
+          <div className="mt-3 flex justify-between">
+            {CUSTOM_BG.map((c, i) => (
+              <button key={c} aria-label={`배경색 ${i + 1}`} aria-pressed={custom.bg === c} onClick={() => setCustom({ ...custom, bg: c })}
+                className={`h-10 w-10 rounded-full shadow-sm ${custom.bg === c ? 'ring-2 ring-blue-500 ring-offset-2' : ''}`} style={{ background: c }} />
+            ))}
+          </div>
+        </>
+      ) : (
+        <input value={name} onChange={(e) => setName(e.target.value.slice(0, 10))}
+          placeholder="이름 (최대 10자)"
+          className="mt-5 w-full rounded-xl bg-white p-4 shadow-sm" />
+      )}
 
       {[['template', '템플릿', template.name], ['word', '단어', oath.word]].map(([key, label, value]) => (
         <button key={key} onClick={() => setPicker(key)}
@@ -77,7 +100,7 @@ export default function MemeMaker({ collected, initialOathId, onClose }) {
 
       {picker === 'template' && (
         <PickerSheet title="템플릿 고르기" onClose={() => setPicker(null)}>
-          {list.map((t) => (
+          {[customTemplate(custom), ...list].map((t) => (
             <button key={t.id} aria-label={t.name} onClick={() => { setTemplateId(t.id); setPicker(null); }}
               className={`overflow-hidden rounded-2xl p-1 ${t.id === template.id ? 'ring-2 ring-blue-500' : ''}`}>
               {/* 미리보기는 캡처 대상이 아니라 zoom으로 줄임 */}
