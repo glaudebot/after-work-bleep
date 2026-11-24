@@ -3,7 +3,7 @@ import { inToss } from './toss.js';
 import { todayKey } from './time.js';
 
 // 콘솔 > 광고 그룹 상세의 ID (M4.1-1). 비어 있으면 광고를 부르지 않는다.
-export const AD_GROUP_ID = '';
+export const AD_GROUP_ID = 'ait.v2.live.1f6901d9364e402a';
 const KEY = 'bleep:lastAd';
 
 /** 저장 결과와 마지막 광고 날짜로 지금 띄울지 (D-16: 하루 1번, 공유 취소면 안 띄움) */
