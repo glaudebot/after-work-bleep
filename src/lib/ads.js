@@ -19,6 +19,13 @@ const lastAd = () => { try { return localStorage.getItem(KEY); } catch { return 
 
 // 같은 광고 그룹은 한 번에 하나만 미리 불러온다 (토스 문서)
 let state = 'idle'; // idle | loading | ready
+const listeners = new Set();
+const setState = (s) => { state = s; listeners.forEach((f) => f()); };
+
+// 저장 버튼에 "광고 보고"를 미리 보여 주기 위한 구독 (useSyncExternalStore).
+// 예상 못 한 시점의 광고는 심사 반려 사유 (2026-11-24 심사, https://developers-apps-in-toss.toss.im/guide/monetization/in-app-ad.md "No Deception")
+export const subscribeAd = (f) => { listeners.add(f); return () => listeners.delete(f); };
+export const adReady = () => state === 'ready' && adDue('saved', lastAd());
 
 /** 짤 만들기 화면을 열 때. 오늘 이미 봤으면 부르지 않는다 */
 export function preloadAd() {
@@ -26,14 +33,14 @@ export function preloadAd() {
   if (!a || state !== 'idle' || !adDue('saved', lastAd())) return;
   try {
     if (!a.load.isSupported()) return;
-    state = 'loading';
+    setState('loading');
     a.load({
       options: { adGroupId: a.id },
-      onEvent: (e) => { if (e.type === 'loaded') state = 'ready'; },
-      onError: () => { state = 'idle'; },
+      onEvent: (e) => { if (e.type === 'loaded') setState('ready'); },
+      onError: () => setState('idle'),
     });
   } catch (e) {
-    state = 'idle';
+    setState('idle');
     console.error(e);
   }
 }
@@ -42,8 +49,8 @@ export function preloadAd() {
 export function showAdAfterSave(result) {
   const a = sdk();
   if (!a || state !== 'ready' || !adDue(result, lastAd())) return;
-  state = 'idle';
   try { localStorage.setItem(KEY, todayKey()); } catch { /* 저장 못 해도 광고는 띄운다 */ }
+  setState('idle');
   try {
     a.show({ options: { adGroupId: a.id }, onEvent: () => {}, onError: (e) => console.error(e) });
   } catch (e) {

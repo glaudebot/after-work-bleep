@@ -352,23 +352,28 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
         const q = await open(browser, { time: at(12), collected: ['es-caramba'], ads: mode });
         await q.getByRole('button', { name: '짤 만들기' }).click(); await q.waitForTimeout(100);
         let downloads = 0;
+        const labels = [];
         q.on('download', () => downloads++);
         for (let i = 0; i < saves; i++) {
-          await q.getByRole('button', { name: /이미지 저장/ }).click();
+          const btn = q.getByRole('button', { name: /저장 · 공유/ });
+          labels.push((await btn.textContent()) + ((await q.getByText('저장하면 광고가 한 번 나와요').count()) ? '+안내' : ''));
+          await btn.click();
           await q.waitForFunction(() => !document.querySelector('button[disabled]'), null, { timeout: 10_000 }).catch(() => {});
           await q.waitForTimeout(300);
         }
         const r = await q.evaluate(() => ({ ...window.__ads, lastAd: localStorage.getItem('bleep:lastAd') }));
         await q.context().close();
-        return { ...r, downloads, failed: r.alerts.some((m) => m.includes('실패')) };
+        return { ...r, downloads, labels, failed: r.alerts.some((m) => m.includes('실패')) };
       };
       const loadFail = await run('loadFail'), showFail = await run('showFail');
       check('T-28', loadFail.downloads === 1 && !loadFail.failed && loadFail.shows === 0
         && showFail.downloads === 1 && !showFail.failed && showFail.shows === 1,
         `불러오기 실패: 저장 ${loadFail.downloads} 광고 ${loadFail.shows} / 띄우기 실패: 저장 ${showFail.downloads} 광고 ${showFail.shows}`);
       const twice = await run('ok', 2), cancel = await run('shareCancel');
-      check('T-29', twice.downloads === 2 && twice.shows === 1 && twice.lastAd === '2026-11-13' && cancel.shows === 0 && cancel.lastAd === null,
-        `두 번 저장: 광고 ${twice.shows} (lastAd ${twice.lastAd}), 공유 취소: 광고 ${cancel.shows}`);
+      // 광고가 나올 저장이면 버튼에 미리 "광고 보고"와 안내 (2026-11-24 심사 반려), 광고를 본 뒤에는 원래 문구
+      const warned = twice.labels.join() === '광고 보고 저장 · 공유+안내,이미지 저장 · 공유' && loadFail.labels[0] === '이미지 저장 · 공유';
+      check('T-29', warned && twice.downloads === 2 && twice.shows === 1 && twice.lastAd === '2026-11-13' && cancel.shows === 0 && cancel.lastAd === null,
+        `두 번 저장: 광고 ${twice.shows} (lastAd ${twice.lastAd}), 공유 취소: 광고 ${cancel.shows}, 버튼 ${twice.labels.join(' → ')} / 불러오기 실패 ${loadFail.labels[0]}`);
     }
 
     check('T-11', wide.every(([, ok]) => ok), wide.filter(([, ok]) => !ok).map(([n]) => n).join(', '));

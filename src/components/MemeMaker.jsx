@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import oaths from '../data/oaths.json';
 import templates from '../data/templates.json';
 import { captureAndShare, preloadCapture } from '../lib/captureAndSave';
-import { preloadAd, showAdAfterSave } from '../lib/ads';
+import { adReady, preloadAd, showAdAfterSave, subscribeAd } from '../lib/ads';
 import MemeCard, { BLEEP } from './MemeCard';
 import PickerSheet from './PickerSheet';
 import { inToss, useTossBack } from '../lib/toss';
@@ -25,6 +25,7 @@ export default function MemeMaker({ collected, initialOathId, onClose }) {
   const [busy, setBusy] = useState(false);
   const [custom, setCustom] = useLocalStorage('bleep:custom', { text: '', bg: CUSTOM_BG[0] });
   useTossBack(onClose);
+  const ad = useSyncExternalStore(subscribeAd, adReady); // 이번 저장 뒤 광고가 나오면 버튼에 미리 알림 (D-16)
   const cardRef = useRef(null);
   useEffect(() => { preloadCapture().catch(() => {}); preloadAd(); }, []); // 실패는 저장 때 다시 시도
 
@@ -95,8 +96,9 @@ export default function MemeMaker({ collected, initialOathId, onClose }) {
 
       <button disabled={busy} onClick={handleSave}
         className="mt-4 w-full rounded-xl bg-blue-500 py-4 font-semibold text-white disabled:opacity-50">
-        {busy ? '만드는 중…' : '이미지 저장 · 공유'}
+        {busy ? '만드는 중…' : ad ? '광고 보고 저장 · 공유' : '이미지 저장 · 공유'}
       </button>
+      {ad && <p className="mt-2 text-center text-xs text-gray-500">저장하면 광고가 한 번 나와요 (하루 1번)</p>}
 
       {picker === 'template' && (
         <PickerSheet title="템플릿 고르기" onClose={() => setPicker(null)}>
