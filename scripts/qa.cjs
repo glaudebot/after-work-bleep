@@ -111,7 +111,7 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
     check('T-07a', (await save.isDisabled()) && (await p.getByText('출근과 퇴근 시각이 같아요').isVisible()));
     await p.context().close();
 
-    p = await open(browser, { time: at(12), collected: ['en-gosh', 'es-miercoles'] });
+    p = await open(browser, { time: at(12), collected: ['en-gosh', 'es-miercoles', 'en-nincompoop'] });
     await p.getByRole('button', { name: /도감/ }).click();
     wide.push(['도감', await noHScroll(p)]);
     // T-23: 국가별·등급별 묶음 소제목과 모은 수 (M3)
@@ -148,10 +148,13 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
     check('T-10', w > 0 && w === h, `${w}x${h}, 눈으로 비교: ${OUT}/meme.png ↔ ${OUT}/meme-screen.png`);
     wide.push(['짤 만들기', await noHScroll(p)]);
 
-    // T-09: 템플릿마다 10자 이름이 카드 밖으로 안 넘침. 템플릿 시트로 하나씩 고른다
+    // T-09: 템플릿마다 10자 이름이 카드 밖으로 안 넘침. 템플릿 시트는 단어 분류에 맞는 것만 보이므로 분류에 맞는 단어를 먼저 고른다
     const templates = require('../src/data/templates.json');
+    const pickWord = async (w) => { await p.getByRole('button', { name: /단어/ }).click(); await p.getByRole('dialog').getByRole('button', { name: w }).click(); };
+    const WORD = { interjection: /고쉬/, noun: /미에르콜레스/, person: /닌컴푸프/, common: /고쉬/ };
     const overflow = [];
     for (const [i, t] of templates.entries()) {
+      if (i === 0 || t.type !== templates[i - 1].type) await pickWord(WORD[t.type]);
       await p.getByRole('button', { name: /템플릿/ }).click();
       if (i === 0) { wide.push(['템플릿 시트', await noHScroll(p)]); await p.screenshot({ path: `${OUT}/sheet-template.png` }); }
       await p.getByRole('dialog').getByRole('button', { name: t.name }).click();
@@ -172,15 +175,22 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
     wide.push(['단어 시트', await noHScroll(p)]);
     await p.screenshot({ path: `${OUT}/sheet-word.png` });
     await p.getByRole('dialog').getByRole('button', { name: /고쉬/ }).click();
-    const bg = await p.locator('[data-card]').evaluate((el) => getComputedStyle(el).backgroundColor);
-    const t18 = [await mark(), bg];
+    // T-18: 단어를 바꾸면 카드가 바로 바뀌고, 템플릿 시트에는 그 분류와 공용만 (2026-11-24)
+    const shown = async () => { await p.getByRole('button', { name: /템플릿/ }).click(); const n = await p.getByRole('dialog').locator('button[aria-label]').allTextContents(); await p.keyboard.press('Escape'); await p.waitForTimeout(100); return n.length; };
+    const want = (type) => templates.filter((t) => t.type === type || t.type === 'common').length;
+    const curName = () => p.getByRole('button', { name: /템플릿/ }).textContent();
+    const t18 = [await mark(), await shown() === want('interjection')];
+    await pickWord(/미에르콜레스/);
+    const nounName = await curName();
+    t18.push(await shown() === want('noun') && templates.some((t) => nounName.includes(t.name) && (t.type === 'noun' || t.type === 'common')));
+    await pickWord(/고쉬/);
     await p.getByRole('button', { name: /단어/ }).click();
     await p.getByRole('dialog').getByRole('button', { name: /단어 없이/ }).click();
     const bleep = await p.locator('[data-card] [data-mark]').evaluate((el) => [el.textContent, getComputedStyle(el).color]);
     const meaning = await p.locator('[data-card]').getByText('뜻:').count();
     await p.locator('[data-card]').screenshot({ path: `${OUT}/card-bleep.png` });
     check('T-19', bleep[0] === '삐-' && bleep[1] === 'rgb(239, 68, 68)' && meaning === 0, bleep.join(' '));
-    check('T-18', t18[0] === '고쉬' && t18[1] === 'rgb(31, 41, 55)', `단어 ${t18[0]}, 마지막 템플릿 배경 ${t18[1]}`);
+    check('T-18', t18[0] === '고쉬' && t18[1] && t18[2], `단어 ${t18[0]}, 감탄사 시트 ${t18[1]}, 명사로 바꾸면 ${nounName}`);
     await p.getByRole('button', { name: '뒤로' }).last().click(); // 짤(위에 겹침) → 도감
     const backToCol = await p.getByText('비속어 도감').isVisible();
     await p.getByRole('button', { name: '뒤로' }).click(); // 도감 → 메인

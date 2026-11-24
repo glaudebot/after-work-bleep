@@ -23,7 +23,9 @@ export default function MemeMaker({ collected, initialOathId, onClose }) {
 
   const oath = owned.length && oathId === BLEEP.id ? BLEEP : owned.find((o) => o.id === oathId) ?? owned[0];
   const xx = name.trim() || 'XX';
-  const template = templates.find((t) => t.id === templateId);
+  // 단어 분류(감탄사·명사·사람)에 맞는 것과 공용만. 단어 없이(삐-)는 전부 (2026-11-24 사용자)
+  const list = templates.filter((t) => !oath?.type || t.type === 'common' || t.type === oath.type);
+  const template = list.find((t) => t.id === templateId) ?? list[0];
 
   const handleSave = async () => {
     if (!cardRef.current || busy) return;
@@ -75,9 +77,9 @@ export default function MemeMaker({ collected, initialOathId, onClose }) {
 
       {picker === 'template' && (
         <PickerSheet title="템플릿 고르기" onClose={() => setPicker(null)}>
-          {templates.map((t) => (
+          {list.map((t) => (
             <button key={t.id} aria-label={t.name} onClick={() => { setTemplateId(t.id); setPicker(null); }}
-              className={`overflow-hidden rounded-2xl p-1 ${t.id === templateId ? 'ring-2 ring-blue-500' : ''}`}>
+              className={`overflow-hidden rounded-2xl p-1 ${t.id === template.id ? 'ring-2 ring-blue-500' : ''}`}>
               {/* 미리보기는 캡처 대상이 아니라 zoom으로 줄임 */}
               <div className="mx-auto text-left" style={{ width: 335, zoom: 0.44 }}><MemeCard template={t} oath={oath} name={xx} /></div>
               <p className="mt-1 text-sm">{t.name}</p>
