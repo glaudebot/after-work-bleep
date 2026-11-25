@@ -281,6 +281,21 @@ const noHScroll = (p) => p.evaluate(() => document.documentElement.scrollWidth <
       await p.context().close();
     }
 
+    // T-34: 복어를 누르면 모은 단어(삐- 포함) 중 하나가 말풍선으로 나오고, 직전 단어는 연달아 안 나오며 2초 뒤 사라짐 (2026-11-25 사용자)
+    {
+      p = await open(browser, { time: at(12), collected: ['es-caramba'] });
+      const said = [];
+      for (let i = 0; i < 4; i++) {
+        await p.locator('[data-mood]').click();
+        said.push(await p.locator('[data-bubble]').innerText());
+      }
+      const okWords = said.every((w) => ['삐-', '카람바'].includes(w)) && said.every((w, i) => !i || w !== said[i - 1]);
+      await p.waitForTimeout(2300);
+      const gone = (await p.locator('[data-bubble]').count()) === 0;
+      check('T-34', okWords && gone, `말풍선 ${said.join(' → ')}, 사라짐 ${gone}`);
+      await p.context().close();
+    }
+
     // T-32: 근무 중에 처음 열면 안내 → 시간 설정 뒤 첫 단어 선물. 퇴근 보상은 그대로 남고, 다시 열면 안 뜸 (2026-11-23 사용자)
     {
       p = await open(browser, { time: at(12), fresh: true });

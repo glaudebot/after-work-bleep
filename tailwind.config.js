@@ -18,6 +18,11 @@ export default {
           '75%': { transform: 'scale(1.24) rotate(-3deg)' },
           '100%': { transform: 'scale(1.32) rotate(0)' },
         },
+        boing: {
+          '0%, 100%': { transform: 'translateY(0) scale(1)' },
+          '30%': { transform: 'translateY(-6%) scale(1.05, 0.95)' },
+          '60%': { transform: 'translateY(0) scale(0.97, 1.03)' },
+        },
         pop: {
           '0%': { transform: 'scale(0.5)', opacity: '0' },
           '60%': { transform: 'scale(1.12)', opacity: '1' },
@@ -28,6 +33,7 @@ export default {
         shake: 'shake 0.25s linear infinite',
         swell: 'swell 1s ease-in forwards',
         pop: 'pop 0.35s ease-out',
+        boing: 'boing 0.4s ease-out',
       },
     },
   },

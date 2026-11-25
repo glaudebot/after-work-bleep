@@ -8,6 +8,7 @@ import RewardModal from './components/RewardModal';
 import Collection from './components/Collection';
 import MemeMaker from './components/MemeMaker';
 import Character from './components/Character';
+import { BLEEP } from './components/MemeCard';
 import Burst from './components/Burst';
 import Tour, { BUBBLE } from './components/Tour';
 import Icon from './components/Icon';
@@ -103,6 +104,7 @@ export default function App() {
     document.addEventListener('visibilitychange', tick);
     return () => { clearInterval(id); document.removeEventListener('visibilitychange', tick); };
   }, []);
+  const words = useMemo(() => [BLEEP.word, ...oaths.filter((o) => collected.includes(o.id)).map((o) => o.word)], [collected]);
   const mood = getMood(work, now);
   const dayPart = getDayPart(now);
   const night = dayPart === 'night';
@@ -116,7 +118,7 @@ export default function App() {
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
           style={{ width: `max(100vw, calc(100dvh * ${BG_RATIO}))`, aspectRatio: BG_RATIO, backgroundImage: `url(${BG[`./assets/bg/${dayPart}.webp`]})`, backgroundSize: '100% 100%' }}>
           <div className="absolute left-1/2 top-[60.7%] w-[55%] -translate-x-1/2 -translate-y-1/2">
-            <Character mood={mood} />
+            <Character mood={mood} words={words} />
           </div>
         </div>
       </div>
