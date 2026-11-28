@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import oaths from '../data/oaths.json';
 import templates from '../data/templates.json';
 import { captureAndShare, preloadCapture } from '../lib/captureAndSave';
-import { adReady, preloadAd, showAdAfterSave, subscribeAd } from '../lib/ads';
 import MemeCard, { BLEEP } from './MemeCard';
 import PickerSheet from './PickerSheet';
 import { inToss, useTossBack } from '../lib/toss';
@@ -25,9 +24,8 @@ export default function MemeMaker({ collected, initialOathId, onClose }) {
   const [busy, setBusy] = useState(false);
   const [custom, setCustom] = useLocalStorage('bleep:custom', { text: '', bg: CUSTOM_BG[0] });
   useTossBack(onClose);
-  const ad = useSyncExternalStore(subscribeAd, adReady); // 이번 저장 뒤 광고가 나오면 버튼에 미리 알림 (D-16)
   const cardRef = useRef(null);
-  useEffect(() => { preloadCapture().catch(() => {}); preloadAd(); }, []); // 실패는 저장 때 다시 시도
+  useEffect(() => { preloadCapture().catch(() => {}); }, []); // 실패는 저장 때 다시 시도
 
   const oath = owned.length && oathId === BLEEP.id ? BLEEP : owned.find((o) => o.id === oathId) ?? owned[0];
   const xx = name.trim() || 'XX';
@@ -43,7 +41,6 @@ export default function MemeMaker({ collected, initialOathId, onClose }) {
       const result = await captureAndShare(cardRef.current, { filename: `bleep_${Date.now()}.png` });
       if (result === 'saved') alert('사진첩에 저장했어요');
       else if (result === 'downloaded') alert('이미지를 저장했어요');
-      showAdAfterSave(result); // 저장이 끝난 뒤 (D-14, D-16)
     } catch (e) {
       console.error(e);
       alert('이미지 저장에 실패했어요. 다시 시도해 주세요.');
@@ -96,9 +93,8 @@ export default function MemeMaker({ collected, initialOathId, onClose }) {
 
       <button disabled={busy} onClick={handleSave}
         className="mt-4 w-full rounded-xl bg-blue-500 py-4 font-semibold text-white disabled:opacity-50">
-        {busy ? '만드는 중…' : ad ? '광고 보고 저장 · 공유' : '이미지 저장 · 공유'}
+        {busy ? '만드는 중…' : '이미지 저장 · 공유'}
       </button>
-      {ad && <p className="mt-2 text-center text-xs text-gray-500">저장하면 광고가 한 번 나와요 (하루 1번)</p>}
 
       {picker === 'template' && (
         <PickerSheet title="템플릿 고르기" onClose={() => setPicker(null)}>
